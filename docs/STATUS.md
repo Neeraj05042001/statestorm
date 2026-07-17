@@ -2,17 +2,35 @@
 
 ## Current work
 
-- Gate: Gate 1 (open)
-- Task: SS-M1-003-F1 (active)
-- State: SS-M1-003 conditionally accepted; local and built-production verification complete; public Vercel verification pending
+- Gate: Gate 1 (passed and formally accepted)
+- Task: SS-M1-003-F2 (complete)
+- State: Gate 1 accepted after local, built-production and public `/analyze` verification
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: SS-M1-003 server-only analysis workflow (conditional)
+- Latest accepted milestone: Gate 1 component-contract and server-analysis baseline
 - Gate 0 execution architecture: Frozen and unchanged
 - RunPlan version 1: Frozen and unchanged
-- Gate 1 scope implemented so far: Accepted domain contracts and deterministic source analysis; conditionally accepted server-only submission workflow
+- Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
 
-## Conditionally accepted SS-M1-003 evidence
+## Formally accepted Gate 1 outcome
+
+The ChatGPT Project architecture authority formally accepted Gate 1 after
+public verification at:
+
+https://statestorm.vercel.app/analyze
+
+Public evidence confirmed that the supported example returns an accepted
+`ProductCard` contract; props, optionality, enum values and defaults render
+correctly; unsupported packages return `UNSUPPORTED_IMPORT`; invalid syntax
+returns `SOURCE_SYNTAX_ERROR`; and missing or unresolved prop declarations
+return stable corrective issues. The page remains mounted without exposing
+server stack traces, the analyzer remains behind its Node.js server-only
+boundary, and the frozen Gate 0 route remains operational.
+
+RunPlan version 1 and the deterministic source-analysis baseline are now frozen.
+No Gate 2 implementation has begun.
+
+## Accepted SS-M1-003 evidence
 
 - `/analyze` provides prompt, component source and TSX/JSX inputs, explicit
   idle/submitting/accepted/rejected/request-error/server-error states, a
@@ -29,10 +47,16 @@
 - No AI integration, requirement extraction, fixture generation, sandbox
   execution integration, detector, editor, state atlas, persistence or database
   was added. Gate 0 remains frozen and unchanged.
-- SS-M1-003 is locally and built-production verified. Public Vercel verification
-  remains pending, and Gate 1 remains open.
+- SS-M1-003 is locally, built-production and publicly verified. Gate 1 is passed
+  and formally accepted.
 - No AI integration, requirement extraction, fixture generation or sandbox
   execution integration has begun.
+- JSX support is intentionally narrow: prop-less JSX components are supported,
+  while props-driven components must use TSX with locally declared prop types.
+  JSDoc and PropTypes inference are not implemented.
+- `ComponentSubmission` still requires a prompt. Deterministic source analysis
+  validates but does not interpret that prompt; it becomes essential in the
+  next milestone for requirement extraction.
 
 ## SS-M1-003 development and built-server evidence
 
@@ -216,12 +240,11 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No local blocker remains for the conditionally accepted SS-M1-003 baseline.
-Public Vercel verification remains pending. Gate 1 remains open, and the
-documented source subset and RunPlan version 1 boundaries remain binding.
+No blocker remains for the accepted Gate 1 baseline. The documented source
+subset, RunPlan version 1 and server-only analysis boundaries remain binding.
+No Gate 2 implementation has begun.
 
 ## Next permitted action
 
-Public Vercel verification of the committed SS-M1-003 workflow. Do not begin AI
-integration, requirement extraction, fixture generation, sandbox execution
-integration or another milestone without a separately authorized task packet.
+Requirement extraction and fixture planning, only under a separately authorized
+task packet. No Gate 2 implementation has begun in this closure task.

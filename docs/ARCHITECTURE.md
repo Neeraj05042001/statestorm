@@ -7,6 +7,11 @@ hackathon MVP. Gate 0 is formally accepted after local development,
 built-production and public verification at
 `https://statestorm.vercel.app/gate-0`.
 
+Gate 1 is also formally accepted after local development, built-production and
+public verification at `https://statestorm.vercel.app/analyze`. RunPlan version
+1, deterministic source analysis and the server-only analysis workflow are now
+frozen as the Gate 1 baseline.
+
 ## Current shell
 
 - Next.js 16.2.10 App Router, TypeScript, ESLint and Tailwind CSS 4
@@ -107,12 +112,11 @@ checking. No `Program`, type checker, module resolver, JSDoc inference or
 dependency graph is created. The full pipeline and supported subset are
 recorded in `docs/SOURCE_ANALYSIS.md`.
 
-## Gate 1 server-only analysis boundary
+## Accepted Gate 1 server-only analysis flow
 
-SS-M1-003 connects the deterministic analyzer through one explicit request
-path:
+The accepted Gate 1 request path is:
 
-`browser form -> POST /api/component-analysis -> Node.js server-only adapter -> analyzer -> validated response`
+`Browser submission -> POST /api/component-analysis -> Node.js server-only service -> deterministic AST analyzer -> validated ComponentContract or ContractIssue errors`
 
 The browser owns form state, creates a URL-safe request ID, sends the strict
 `ComponentSubmission` JSON value and renders the returned diagnostic contract
@@ -135,6 +139,22 @@ module or writes it to the filesystem.
 The `/analyze` page is deliberately a minimal diagnostic workflow. It does not
 persist input, invoke AI, generate fixtures, integrate with Sandpack or change
 the frozen Gate 0 runtime.
+
+The accepted language boundary distinguishes prop-less JSX from props-driven
+components. A prop-less named JSX component is supported. A component with
+props must use TSX and locally declared prop types. Neither JSDoc nor PropTypes
+is inspected for prop inference.
+
+The complete `ComponentSubmission` contract continues to require a prompt. The
+current deterministic analyzer validates the submission but does not interpret
+the prompt. That field becomes essential when a later authorized milestone adds
+requirement extraction and fixture planning.
+
+Public verification confirmed accepted contract display, prop optionality, enum
+values and defaults, stable unsupported-import and syntax issues, stable missing
+or unresolved props issues, sanitized server failures, the Node.js server-only
+boundary and the unchanged Gate 0 route. The diagnostic UI remains temporary
+and is not the final StateStorm product design.
 
 ## Verified Sandpack setup
 

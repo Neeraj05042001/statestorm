@@ -292,9 +292,8 @@
 - Validation method: Runtime schema tests, concrete issue-path assertions,
   executability tests, JSON round-trip tests, lint, strict type-checking and a
   production build.
-- Current status: Accepted by the ChatGPT Project architecture authority. Gate 1
-  remains open, and the next permitted work is source-code analysis into
-  `ComponentContract`.
+- Current status: Accepted by the ChatGPT Project architecture authority and
+  frozen as part of the formally accepted Gate 1 baseline in D-028.
 
 ## D-018: Parse component source with the TypeScript Compiler API
 
@@ -389,15 +388,14 @@
   Handler, Server Action or equivalent server boundary and a serializable
   request/result contract.
 - Risk: The workflow requires a reachable application server and ships the
-  TypeScript runtime in the server build. Deployment-specific runtime and size
-  behavior still require verification when this milestone is deployed.
+  TypeScript runtime in the server build. Later deployment changes could regress
+  the verified boundary or server artifact footprint.
 - Validation method: Inspect the client dependency graph for analyzer and
   `typescript` imports, build the connected production application, and verify
   the deployed server-only analysis request without shipping TypeScript to the
   client.
-- Current status: Implemented by SS-M1-003 through the dedicated
-  `src/server/component-analysis` adapter. Production build and local built-
-  server verification are required before architecture acceptance.
+- Current status: Accepted and frozen in the Gate 1 baseline after local,
+  built-production and public server-boundary verification.
 
 ## D-024: Use a Node.js Route Handler as the explicit analyzer boundary
 
@@ -412,7 +410,7 @@
   unavailable even though the form can load.
 - Validation method: Route tests, production build artifact inspection and a
   successful built-server API request.
-- Current status: Implemented for SS-M1-003; Gate 1 remains open.
+- Current status: Accepted and frozen in the Gate 1 baseline.
 
 ## D-025: Treat unsupported source as a normal analysis result
 
@@ -426,7 +424,7 @@
 - Risk: Clients that ignore the response schema could misread a 200 response.
 - Validation method: Service, Route Handler and built-server unsupported-import
   checks.
-- Current status: Implemented for SS-M1-003.
+- Current status: Accepted fail-closed Gate 1 behavior.
 
 ## D-026: Do not persist component-analysis submissions
 
@@ -439,7 +437,7 @@
 - Risk: Users cannot recover or share a prior analysis.
 - Validation method: Code inspection for storage, database and filesystem-write
   paths.
-- Current status: Accepted SS-M1-003 scope boundary.
+- Current status: Accepted Gate 1 scope boundary.
 
 ## D-027: Use a minimal diagnostic UI before product workflow design
 
@@ -454,4 +452,36 @@
 - Risk: It must not be mistaken for the complete StateStorm workflow.
 - Validation method: Development and built-server checks for every required UI
   state and the supported example.
-- Current status: Implemented for SS-M1-003; final product UI is deferred.
+- Current status: Accepted as a temporary Gate 1 diagnostic; final product UI
+  remains deferred.
+
+## D-028: Accept the Gate 1 component-contract and server-analysis baseline
+
+- Recommendation: Freeze RunPlan version 1, deterministic component source
+  analysis and the public `/analyze` server workflow as the accepted Gate 1
+  baseline.
+- Reason: Local development, built-production and public Vercel evidence prove
+  supported contract extraction, stable fail-closed issues, sanitized failure
+  handling and an intact Gate 0 boundary.
+- Accepted flow: Browser submission -> `POST /api/component-analysis` -> Node.js
+  server-only service -> deterministic AST analyzer -> validated
+  `ComponentContract` or `ContractIssue` errors.
+- Binding boundary: The analyzer and TypeScript Compiler API remain server-only.
+  Unsupported imports, syntax, prop declarations and prop types continue to
+  fail closed without a partial contract.
+- JSX boundary: Prop-less JSX components are supported. Props-driven components
+  must use TSX with locally declared prop types; JSDoc and PropTypes inference
+  remain unimplemented.
+- Prompt boundary: The complete `ComponentSubmission` contract still requires a
+  prompt. Deterministic source analysis does not interpret it; requirement
+  extraction will make it operationally essential in the next milestone.
+- UI boundary: `/analyze` is a temporary diagnostic interface, not the final
+  StateStorm product design.
+- Preserved limitations: Self-contained components, local JSON-compatible props,
+  no callbacks or ReactNode, no imported prop types, no full TypeScript semantic
+  checking, no persistence, and no AI or sandbox execution from `/analyze`.
+- Validation method: Required command validation plus public supported,
+  unsupported, syntax, props-resolution, sanitization, server-boundary and Gate
+  0 regression evidence.
+- Current status: Formally accepted by the ChatGPT Project architecture
+  authority. Gate 1 is passed and closed; no Gate 2 implementation has begun.
