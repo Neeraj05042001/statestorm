@@ -66,12 +66,12 @@
 18. **Self-contained component scope.** Components that require local files,
     styles imported from modules, design systems or other npm packages are not
     representable by the current contract.
-19. **Metadata is supplied manually.** SS-M1-001 validates submission,
-    component, prop, requirement, fixture, issue and RunPlan metadata but does
-    not derive it from source code.
-20. **No source inference or AI generation exists.** There is no parser, AST
-    analysis, prop inference, requirement extraction, fixture generator or
-    OpenAI integration in the implemented domain layer.
+19. **Only ComponentContract metadata is source-derived.** SS-M1-002 derives the
+    documented local component and prop subset. Requirement, fixture, issue and
+    RunPlan assembly remain supplied data; they are not inferred or generated.
+20. **No AI generation exists.** Deterministic AST analysis is implemented, but
+    there is no AI interpretation, requirement extraction, fixture generator or
+    OpenAI integration.
 21. **Execution integration is deferred.** A validated executable RunPlan is a
     data classification only; no RunPlan-to-Sandpack adapter or versioned
     execution-result contract exists yet.
@@ -79,3 +79,23 @@
     dependency findings. They are non-blocking for the accepted RunPlan version
     1 baseline, and no forced dependency upgrade was performed. They require a
     separately authorized dependency review before production certification.
+23. **Component declaration support is narrow.** Analysis accepts named default
+    functions, named local functions or arrows exported directly as default,
+    and documented React `FC`/`FunctionComponent` annotations only. Anonymous
+    defaults, wrappers, `memo` and `forwardRef` are unsupported.
+24. **No class or generic components.** Class declarations, generic component
+    functions and components with multiple parameters fail closed.
+25. **No imported prop types.** Props must resolve to an inline object, one
+    local interface or one local object type alias in the submitted source.
+26. **No executable or ReactNode props.** Callbacks, function types, ReactNode,
+    JSX values and other executable shapes are rejected rather than classified
+    as `unknown`.
+27. **No JSDoc prop inference.** JSX source with a props parameter must still
+    provide a supported type declaration; JSDoc is not inspected.
+28. **No full TypeScript semantic checking.** The analyzer uses
+    `createSourceFile` and local syntax traversal only. It does not create a
+    `Program`, invoke the type checker, resolve modules or prove body-level type
+    correctness.
+29. **Complex type composition is unsupported.** Inherited interfaces,
+    intersections, conditional and mapped types, indexed access, generic type
+    parameters, non-literal unions and recursive object types fail closed.

@@ -1,0 +1,13 @@
+flowchart LR
+    submission["ComponentSubmission"] --> syntax["Syntax parsing"]
+    syntax --> imports["Import validation"]
+    imports --> component["Default component resolution"]
+    component --> props["Props analysis"]
+    props --> schema["ComponentContract schema validation"]
+    schema --> accepted["Accepted ComponentContract"]
+    syntax --> errors["ContractIssue errors"]
+    imports --> errors
+    component --> errors
+    props --> errors
+    schema --> errors
+

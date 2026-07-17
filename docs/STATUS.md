@@ -3,13 +3,37 @@
 ## Current work
 
 - Gate: Gate 1 (open)
-- Task: SS-M1-001-F1 (complete)
-- State: SS-M1-001 accepted; RunPlan version 1 contract baseline established
+- Task: SS-M1-002-F1 (complete)
+- State: SS-M1-002 accepted; deterministic source-analysis baseline established
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: SS-M1-001 RunPlan version 1 contract baseline
+- Latest accepted milestone: SS-M1-002 deterministic source-analysis baseline
 - Gate 0 execution architecture: Frozen and unchanged
-- Gate 1 scope implemented so far: Domain contracts and validation tests only
+- RunPlan version 1: Frozen and unchanged
+- Gate 1 scope implemented so far: Accepted domain contracts and deterministic source analysis
+
+## Accepted SS-M1-002 evidence
+
+- The ChatGPT Project architecture authority accepted SS-M1-002 as the
+  deterministic source-analysis baseline.
+- The installed TypeScript 5.9.3 Compiler API parses TSX or JSX in memory with
+  parent nodes enabled; submitted code is not executed, imported, transpiled or
+  written to disk.
+- Source-order AST traversal validates imports, resolves one named default
+  function component, resolves the documented local props subset, extracts only
+  compatible JSON literal defaults and validates accepted output through
+  `ComponentContractSchema`.
+- Unsupported syntax, imports, component declarations, prop declarations,
+  types and defaults fail closed with stable `ContractIssue` codes and useful
+  source paths. Fatal issues never return a partial contract.
+- Tests prove supported named function, arrow, `React.FC`, imported
+  `FC`/`FunctionComponent`, interface, object-alias, inline, destructured,
+  primitive, enum, array, object and default-value forms.
+- Tests also prove identical-input determinism, source-order props, schema
+  acceptance and every required unsupported-source category.
+- No AI, requirement extraction, fixture generation, sandbox integration,
+  detector, editor, state atlas or UI was added. The frozen Gate 0 runtime was
+  not modified.
 
 ## Accepted SS-M1-001 evidence
 
@@ -126,7 +150,7 @@ compilation-error correlation contract.
 | --- | --- | --- |
 | `npm run lint` | Pass | ESLint completed with no errors or warnings |
 | `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
-| `npm run test` | Pass | Vitest 4.1.10 passed 32 tests across 2 files |
+| `npm run test` | Pass | Vitest 4.1.10 passed 92 tests across 5 files, including all existing RunPlan tests |
 | `npm run build` | Pass | Next.js 16.2.10 compiled, TypeScript passed, and `/`, `/_not-found` and `/gate-0` were statically prerendered |
 | `npm run start -- -p 3100` | Pass | Next.js production server became ready in 995 ms at `http://localhost:3100` |
 
@@ -147,12 +171,13 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No blocker remains for the accepted RunPlan version 1 contract baseline. Gate 1
-remains open, its known limitations remain binding, and no source analysis or
-execution integration has begun.
+No blocker remains for the accepted SS-M1-002 baseline. Gate 1 remains open,
+and the documented source subset and RunPlan version 1 boundaries remain
+binding.
 
 ## Next permitted action
 
-Source-code analysis into `ComponentContract`. Do not begin AI integration,
-fixture generation, execution integration or another milestone without a
-separately authorized task packet.
+Server-only analyzer integration and the component submission workflow. Do not
+begin AI integration, requirement extraction, fixture generation, sandbox
+execution integration or another milestone without a separately authorized task
+packet.

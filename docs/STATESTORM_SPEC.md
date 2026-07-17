@@ -111,7 +111,7 @@ The current frozen scope excludes:
 | Gate 0 serialized Sandpack feasibility diagnostic and recovery evidence | Implemented and accepted as the frozen execution baseline |
 | Runtime-validated component, requirement, fixture, issue and RunPlan v1 schemas | Implemented and accepted |
 | JSON round-trip, cross-field validation and executability classification | Implemented and accepted |
-| Source-code analysis into `ComponentContract` | Planned; next permitted work and not implemented |
+| Deterministic source-code analysis into `ComponentContract` | Implemented for the documented local AST subset; Gate 1 review pending |
 | AI prompt interpretation, requirement extraction and fixture generation | Planned; not implemented |
 | RunPlan-to-Sandpack execution integration | Planned; not implemented |
 | Deterministic production detectors and requirement evaluation | Planned; not implemented |

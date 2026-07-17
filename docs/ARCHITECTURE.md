@@ -70,17 +70,42 @@ Zod runtime schemas define `ComponentSubmission`, `ComponentContract`,
 `RunPlan` data. Their TypeScript types are inferred from the schemas rather than
 maintained separately.
 
-The layer accepts manually supplied metadata, enforces the React import
-allowlist and JSON-only executable values, and performs RunPlan cross-field
-validation. Structural validation is separate from executability: a plan with
-an error-severity `ContractIssue` is valid serialized data but is classified as
+The layer validates supplied metadata, enforces the React import allowlist and
+JSON-only executable values, and performs RunPlan cross-field validation.
+Structural validation is separate from executability: a plan with an
+error-severity `ContractIssue` is valid serialized data but is classified as
 non-executable.
 
 This layer is deliberately separated from the frozen Gate 0 execution path.
-There is no source parser, inference service, AI call, fixture generator,
-requirement evaluator, RunPlan-to-Sandpack adapter or execution-result contract.
-Nothing in `src/domain` imports the sandbox spike, and Gate 0 behavior is
+There is no AI call, fixture generator, requirement evaluator,
+RunPlan-to-Sandpack adapter or execution-result contract. Nothing in
+`src/domain` or `src/analysis` imports the sandbox spike, and Gate 0 behavior is
 unchanged.
+
+## Gate 1 deterministic source-analysis layer
+
+SS-M1-002 adds `src/analysis/component-source` between a validated
+`ComponentSubmission` and the accepted `ComponentContract` schema. It parses
+the submitted string in memory with the installed TypeScript Compiler API and
+traverses syntax nodes directly. It never executes, imports, transpiles or
+writes submitted code.
+
+The layer has a deliberate facts-only boundary. It records static syntax facts:
+allowlisted imports, one named default function component, local prop
+declarations, source-order properties, optional markers, literal unions and
+complete JSON destructuring defaults. Later AI interpretation may consume a
+validated contract, but AI does not participate in source parsing or override a
+parser rejection.
+
+Analysis fails closed. Syntax diagnostics, disallowed imports, ambiguous default
+exports, imported or unresolved prop types, complex composition and executable
+prop shapes produce stable `ContractIssue` errors and no partial contract. A
+candidate is accepted only after `ComponentContractSchema` validates it.
+
+This is limited local AST analysis rather than full TypeScript semantic type
+checking. No `Program`, type checker, module resolver, JSDoc inference or
+dependency graph is created. The full pipeline and supported subset are
+recorded in `docs/SOURCE_ANALYSIS.md`.
 
 ## Verified Sandpack setup
 

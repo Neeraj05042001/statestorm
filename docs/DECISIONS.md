@@ -295,3 +295,106 @@
 - Current status: Accepted by the ChatGPT Project architecture authority. Gate 1
   remains open, and the next permitted work is source-code analysis into
   `ComponentContract`.
+
+## D-018: Parse component source with the TypeScript Compiler API
+
+- Recommendation: Parse submitted TSX and JSX with `typescript.createSourceFile`
+  and traverse the resulting syntax tree.
+- Reason: The accepted component language is React TSX/JSX, and the installed
+  compiler provides deterministic syntax structure and diagnostics without
+  executing source.
+- Alternatives considered: Regular-expression parsing, Babel, ts-morph, SWC or
+  importing/transpiling the submitted module.
+- Trade-off: The analyzer is coupled to the installed TypeScript syntax API.
+- Risk: Compiler upgrades can change parse diagnostics or node shapes and
+  require explicit analyzer regression review.
+- Validation method: Syntax, import, export and prop tests assert stable domain
+  output without AST snapshots.
+- Current status: Accepted as part of the SS-M1-002 deterministic
+  source-analysis baseline.
+
+## D-019: Use limited local AST facts instead of semantic type checking
+
+- Recommendation: Resolve only declarations present in the submitted source and
+  do not create a TypeScript `Program`, type checker or module resolver.
+- Reason: The frozen self-contained subset needs predictable local facts, not
+  repository or package graph access.
+- Alternatives considered: Full TypeScript semantic analysis, package
+  resolution or repository-aware compilation.
+- Trade-off: Type aliases and object relationships beyond the documented local
+  subset cannot be interpreted.
+- Risk: Some semantically valid React components are rejected.
+- Validation method: Local interface, object alias and inline-type tests pass;
+  imported, unresolved, inherited and composed types fail with stable issues.
+- Current status: Accepted for SS-M1-002; broader semantic analysis is deferred.
+
+## D-020: Fail closed for unsupported source and prop types
+
+- Recommendation: Return `accepted: false` with stable `ContractIssue` errors
+  whenever syntax or type structure is ambiguous or outside the supported
+  subset.
+- Reason: Silently guessing `unknown` would misclassify executable component
+  contracts and weaken the JSON execution boundary.
+- Alternatives considered: Best-effort inference, warnings with partial
+  contracts or coercing unsupported values to `unknown`.
+- Trade-off: The analyzer rejects inputs that a human or full compiler could
+  interpret.
+- Risk: The MVP support rate is intentionally narrow.
+- Validation method: Unsupported callback, ReactNode, built-in, generic,
+  imported and composed type tests return errors and never a partial contract.
+- Current status: Accepted for SS-M1-002.
+
+## D-021: Require one named default function component
+
+- Recommendation: Resolve only named default function declarations or named
+  local function/arrow declarations exported directly as default.
+- Reason: A stable local component name and direct declaration make resolution
+  deterministic without executing wrappers.
+- Alternatives considered: Anonymous defaults, class components, default
+  expressions, higher-order components, `memo` or `forwardRef` wrappers.
+- Trade-off: Common wrapped or anonymous React patterns are unsupported.
+- Risk: Users must simplify otherwise valid components before submission.
+- Validation method: Every supported declaration pattern passes; anonymous,
+  class, generic, multi-parameter and wrapped defaults return named issue codes.
+- Current status: Accepted for the MVP source subset.
+
+## D-022: Defer imported prop types and complex composition
+
+- Recommendation: Accept only inline object types and one local non-inherited,
+  non-generic interface or object type alias for props.
+- Reason: Imported types, intersections, conditional or mapped types require
+  semantic/module analysis outside the frozen task.
+- Alternatives considered: Resolve dependency graphs, merge interfaces or
+  approximate composed types from syntax alone.
+- Trade-off: Multi-file and composition-heavy components are rejected.
+- Risk: Version 1 source analysis does not cover arbitrary production React
+  type patterns.
+- Validation method: Imported, inherited, intersection, indexed-access and
+  unresolved prop tests fail closed with useful source paths.
+- Current status: Accepted SS-M1-002 scope boundary; complex composition remains
+  deferred.
+
+## D-023: Keep analyzer integration behind a dedicated server-only adapter
+
+- Recommendation: Connect the accepted analyzer to future UI work only through
+  a dedicated adapter marked `server-only`. No client component or
+  client-transitive module may import the analyzer or the TypeScript runtime.
+- Reason: The analyzer has a runtime dependency on the TypeScript Compiler API,
+  while submitted source analysis belongs on the server boundary and must not
+  enlarge or expose the browser bundle.
+- Alternatives considered: Import the analyzer directly into a client
+  component, share its runtime entry through a client-transitive barrel or run
+  TypeScript parsing in the browser.
+- Trade-off: The component submission workflow requires an explicit Route
+  Handler, Server Action or equivalent server boundary and a serializable
+  request/result contract.
+- Risk: The analyzer is currently unwired, so the production build does not yet
+  prove that the deployed server runtime bundles or resolves the direct
+  TypeScript dependency. Integration must verify that behavior before the new
+  workflow is accepted.
+- Validation method: Inspect the client dependency graph for analyzer and
+  `typescript` imports, build the connected production application, and verify
+  the deployed server-only analysis request without shipping TypeScript to the
+  client.
+- Current status: Accepted integration constraint. No server adapter or
+  component submission workflow is implemented in SS-M1-002.
