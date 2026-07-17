@@ -16,6 +16,7 @@ const MAX_RENDERED_CHILD_COUNT = 100;
 export type SandboxComponentMode =
   | "bootstrap"
   | "valid"
+  | "recovery-bootstrap"
   | "invalid-compilation-probe";
 
 export interface SandboxRun {
@@ -102,6 +103,7 @@ function isComponentMode(value: unknown): value is SandboxComponentMode {
   return (
     value === "bootstrap" ||
     value === "valid" ||
+    value === "recovery-bootstrap" ||
     value === "invalid-compilation-probe"
   );
 }

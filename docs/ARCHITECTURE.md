@@ -4,8 +4,9 @@
 
 Sandpack is the accepted **browser-isolated execution candidate** for the
 hackathon MVP. F1 and F2 are accepted. Local runtime containment, provisional
-compilation classification and built production-server execution are proven;
-Gate 0 remains open pending public deployment verification.
+compilation classification, deterministic compilation recovery and built
+production-server execution are proven; Gate 0 remains open pending public
+verification of the corrected build.
 
 ## Current shell
 
@@ -168,6 +169,51 @@ may continue displaying DOM from the previous valid run. That DOM is explicitly
 stale output. Its run ID does not match the active invalid diagnostic, and it
 must never be accepted as the current result.
 
+## Verified F4 compilation-recovery root cause
+
+The pre-F4 restoration path updated provider files and immediately changed the
+active component mode from `invalid-compilation-probe` to `valid`. It did not
+wait for a new current-client compile cycle, a cleared Sandpack context error or
+a fresh runtime bootstrap before re-enabling fixture execution.
+
+That created two related races. Source restoration and a subsequent fixture
+update could overlap, and a late `done.compilatonError` or `action/show-error`
+message from the invalid compile could be interpreted under the newly active
+valid run. Because those listener messages have no StateStorm correlation
+fields, the parent could enter `Run failure` even though the error belonged to
+the previous invalid source. The iframe then continued displaying the stale
+compilation result.
+
+Installed Sandpack behavior also explains why provider state alone was not
+proof of recovery: its file-update observer dispatches only to registered
+clients whose status is already `done`. The old restore path prechecked that
+status but did not prove that the restored files started and completed a fresh
+compile on the same client.
+
+## Corrected restoration lifecycle
+
+Restoration is now a distinct serialized `recovery-bootstrap` run:
+
+1. The parent verifies the current preview client is `done`, writes the valid
+   `/UserComponent.tsx` plus the recovery fixture into provider state and calls
+   `updateSandbox` with those exact files on that same client.
+2. Controls remain disabled while the parent observes a fresh listener `start`.
+3. The current client must then report a successful `done`; an old already-done
+   snapshot is not accepted as the recovery completion.
+4. The public Sandpack context error must be null.
+5. The restored runtime bridge must emit a fresh source-window-validated and
+   run-correlated `SANDBOX_READY` event.
+6. Only after all four recovery signals are present does the parent enter
+   `Compiler recovery verified`, clear the serialized in-flight lock and enable
+   fixture controls.
+
+Compilation failures are current results only while the active serialized mode
+is `invalid-compilation-probe`. Uncorrelated listener errors observed during a
+valid or recovery run are retained as diagnostics but cannot fail that run. A
+valid render additionally requires a null current context error. No parent
+refresh, Next.js remount or Sandpack client remount is used; parent-owned
+heartbeat state survives both recovery cycles.
+
 ## Verified timeout behavior
 
 Runtime and compilation outcomes stop the current run timer with their distinct
@@ -182,9 +228,12 @@ mismatch and did not cancel the timer. Initialization retains its separate
 `npm run build` compiled and statically prerendered `/gate-0`. The normal
 `npm run start -- -p 3100` command served the route at
 `http://localhost:3100/gate-0`. Edge 150 direct navigation reached readiness and
-completed safe, crash, heartbeat, safe recovery, long, invalid source, valid
-source restoration and final safe-render checks. The production parent target
-recorded no console messages, uncaught exceptions or loading failures.
+completed safe, crash, heartbeat, safe recovery and long-content checks. F4 then
+passed two complete invalid-source recovery cycles followed by visible
+`safe-short` and `safe-long` renders. Both recoveries proved current-client
+start/successful-done, null context error and fresh bootstrap evidence. The
+production parent target recorded no `Run failure`, console message, uncaught
+exception or loading failure.
 
 ## Questions still open
 
@@ -192,6 +241,7 @@ recorded no console messages, uncaught exceptions or loading failures.
   lack message-level StateStorm correlation.
 - The development Strict Mode trade-off must be reopened before
   post-hackathon hardening or broader product expansion.
-- Public deployment and its network policy remain unverified.
+- Public verification of the corrected F4 build and its network policy remains
+  pending.
 - Resource exhaustion, infinite-loop containment and malicious-code hardening
   remain unimplemented.

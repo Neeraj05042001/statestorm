@@ -132,3 +132,24 @@
   events to the active run, and verify that invalid-source state rejects the
   retained previous run ID.
 - Current status: Accepted for the hackathon MVP.
+
+## D-009: Require an explicit current-client restoration handshake
+
+- Recommendation: Restore invalid source through a dedicated serialized
+  `recovery-bootstrap` run dispatched to the verified current client. Re-enable
+  fixture execution only after a fresh compile `start`, successful `done`, null
+  context error and fresh correlated `SANDBOX_READY` event.
+- Reason: The pre-F4 provider-only transition changed the active mode too early.
+  It neither proved that valid source completed on the current client nor
+  separated late uncorrelated invalid-source errors from the next valid run.
+- Alternatives: Clear error state immediately, delay by a fixed interval, trust
+  provider file state, remount the Sandpack preview or refresh the parent.
+- Trade-off: Recovery has an explicit intermediate run and waits for four
+  signals before controls return.
+- Risk: Listener compilation messages remain provisional and uncorrelated. The
+  serialized restriction is still mandatory.
+- Validation method: In development and built production mode, run two invalid
+  TSX/restoration cycles, require all four recovery signals, then visibly render
+  `safe-short` and `safe-long` while preserving the parent heartbeat.
+- Current status: Implemented for Gate 0. Public verification of the corrected
+  build remains pending; Gate 0 remains open.

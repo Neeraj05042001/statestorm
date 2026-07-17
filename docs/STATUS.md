@@ -3,12 +3,37 @@
 ## Current work
 
 - Gate: Gate 0 (open; not accepted)
-- Task: SS-M0-001-F3
-- State: Gate 0 repository baseline audit and validation
+- Task: SS-M0-001-F4
+- State: F4 passed local development and built-production verification; public
+  redeployment verification remains pending
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
 - Prior decisions: SS-M0-001-F1 and SS-M0-001-F2 are accepted by the ChatGPT
   Project architecture authority
+
+## Verified F4 evidence
+
+- The deployed pre-F4 build could classify invalid TSX, but restoration changed
+  the active run to valid before proving that the current Sandpack client had
+  compiled the restored source. A later, uncorrelated listener error could then
+  be assigned to that valid run and force `Run failure` while the iframe retained
+  the stale compilation overlay.
+- Restoration now dispatches the valid `/UserComponent.tsx` and a dedicated
+  `recovery-bootstrap` fixture directly to the verified current preview client.
+  Fixture controls remain disabled until that client emits a fresh `start`, a
+  successful `done`, the public context error is null and the runtime bridge
+  emits a fresh, correlated `SANDBOX_READY` event.
+- Stale compilation listener messages are diagnostic only outside the active
+  serialized invalid probe. They cannot fail a later valid or recovery run.
+- Edge 150 development mode passed `safe-short` -> invalid TSX -> restore ->
+  `safe-short` -> invalid TSX -> restore -> `safe-long`. Both restorations
+  reached `Compiler recovery verified`; the final long render produced 237
+  visible characters and the parent heartbeat remained 1.
+- The same sequence passed against the built server at
+  `http://localhost:3100/gate-0`. The production collection recorded no parent
+  `Run failure`, exception, console message or loading failure.
+- Neither recovery remounted nor refreshed the Next.js parent application. A
+  Sandpack preview/client remount was not necessary.
 
 ## Verified F2 evidence
 
@@ -65,11 +90,13 @@ compilation-error correlation contract.
 | `npm run lint` | Pass | ESLint completed with no errors or warnings |
 | `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
 | `npm run build` | Pass | Next.js 16.2.10 compiled, TypeScript passed, and `/`, `/_not-found` and `/gate-0` were statically prerendered |
-| `npm run start -- -p 3100` | Pass | Next.js production server became ready in 576 ms at `http://localhost:3100` |
+| `npm run start -- -p 3100` | Pass | Next.js production server became ready in 995 ms at `http://localhost:3100` |
 
 ## Remaining Gate 0 evidence and risks
 
-- Public deployment and direct deployed `/gate-0` navigation remain unverified.
+- The corrected F4 build has not been deployed or verified at the public
+  `/gate-0` URL. The earlier deployed build exhibited the recovery failure that
+  F4 corrects.
 - Compilation observability is accepted provisionally only while execution is
   strictly serialized; it still lacks message-level StateStorm correlation.
 - Previous iframe DOM after invalid source is stale output and must never be
@@ -82,12 +109,13 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No blocker remains for runtime crash containment, parent survival, safe recovery,
-compilation diagnostics or built local production-server execution. Gate 0
-remains open because public deployment verification is pending.
+No local blocker remains for runtime crash containment, parent survival,
+serialized compilation recovery, compilation diagnostics or built local
+production-server execution. Gate 0 remains open because the corrected build
+still requires public deployment verification.
 
 ## Next permitted action
 
-Perform the separately authorized public deployment and verify direct deployed
-`/gate-0` navigation plus the Gate 0 technical sequence. Do not begin another
-milestone or mark Gate 0 passed before that evidence is reviewed.
+After separate authorization, deploy the corrected build and verify direct
+deployed `/gate-0` navigation plus the F4 recovery sequence. Do not begin
+another milestone or mark Gate 0 passed before that evidence is reviewed.

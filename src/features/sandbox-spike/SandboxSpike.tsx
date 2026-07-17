@@ -39,6 +39,8 @@ type GateZeroState =
   | "sandpack-initializing"
   | "sandpack-ready"
   | "compiling-current-run"
+  | "restoring-valid-source"
+  | "compiler-recovery-verified"
   | "component-visibly-rendered"
   | "runtime-error"
   | "compilation-diagnostic-error"
@@ -76,10 +78,19 @@ interface RunSignals {
   renderEvent: Extract<SandboxEvent, { type: "RENDER_COMMITTED" }> | null;
 }
 
+interface RestorationSignals {
+  compileStarted: boolean;
+  clientDone: boolean;
+  contextErrorCleared: boolean;
+  bootstrapEvent: Extract<SandboxEvent, { type: "SANDBOX_READY" }> | null;
+}
+
 const STATE_LABELS: Record<GateZeroState, string> = {
   "sandpack-initializing": "Sandpack initializing",
   "sandpack-ready": "Sandpack ready",
   "compiling-current-run": "Compiling current run",
+  "restoring-valid-source": "Restoring valid source",
+  "compiler-recovery-verified": "Compiler recovery verified",
   "component-visibly-rendered": "Component visibly rendered",
   "runtime-error": "Runtime error",
   "compilation-diagnostic-error": "Compilation diagnostic error",
@@ -223,7 +234,15 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
     clientDone: false,
     renderEvent: null,
   });
+  const restorationSignalsRef = useRef<RestorationSignals>({
+    compileStarted: false,
+    clientDone: false,
+    contextErrorCleared: false,
+    bootstrapEvent: null,
+  });
   const completedRunIdRef = useRef<string | null>(null);
+  const completedRestorationRunIdRef = useRef<string | null>(null);
+  const sandpackErrorRef = useRef(sandpack.error);
 
   const [activeRun, setActiveRun] = useState(initialRun);
   const [latestFixtureId, setLatestFixtureId] =
@@ -250,6 +269,9 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
   >("not run");
   const [invalidRuntimeBridgeObservation, setInvalidRuntimeBridgeObservation] =
     useState("not investigated");
+  const [restorationEvidence, setRestorationEvidence] = useState(
+    "not started",
+  );
   const [visibleEvidence, setVisibleEvidence] =
     useState<VisibleRenderEvidence | null>(null);
   const [readyEvidence, setReadyEvidence] =
@@ -368,6 +390,7 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
     if (
       currentRun.componentMode !== "valid" ||
       completedRunIdRef.current === currentRun.runId ||
+      sandpackErrorRef.current !== null ||
       !signals.clientDone ||
       !signals.renderEvent ||
       currentClient?.status !== "done"
@@ -388,6 +411,44 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
       eventType: "RUN_CONFIRMED_VISIBLE",
       outcome: "success",
       detail: describeVisibleEvidence(signals.renderEvent.evidence),
+    });
+  }, [appendLog]);
+
+  const completeRestorationIfReady = useCallback(() => {
+    const signals = restorationSignalsRef.current;
+    const currentRun = activeRunRef.current;
+    const currentClient = previewRef.current?.getClient();
+    if (
+      currentRun.componentMode !== "recovery-bootstrap" ||
+      completedRestorationRunIdRef.current === currentRun.runId ||
+      !signals.compileStarted ||
+      !signals.clientDone ||
+      !signals.contextErrorCleared ||
+      !signals.bootstrapEvent ||
+      sandpackErrorRef.current !== null ||
+      currentClient?.status !== "done"
+    ) {
+      return;
+    }
+
+    completedRestorationRunIdRef.current = currentRun.runId;
+    setVisibleEvidence(signals.bootstrapEvent.evidence);
+    setReadyEvidence(signals.bootstrapEvent.evidence);
+    setGateState("compiler-recovery-verified");
+    setStateDetail(
+      "Valid source reached the current client, its compile completed, the context error cleared, and a fresh bootstrap event was accepted.",
+    );
+    setRestorationEvidence(
+      "verified: current-client start + successful done + null context error + fresh SANDBOX_READY",
+    );
+    setRunInFlight(false);
+    appendLog({
+      runId: currentRun.runId,
+      fixtureId: currentRun.fixtureId,
+      eventType: "COMPILER_RECOVERY_CONFIRMED",
+      outcome: "success",
+      detail:
+        "Current client completed restored source with a null context error and fresh bootstrap evidence.",
     });
   }, [appendLog]);
 
@@ -444,7 +505,6 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
       captureIframeSnapshot();
 
       if (validation.event.type === "SANDBOX_READY") {
-        initializationSignalsRef.current.visibleRuntimeReady = true;
         setReadyEvidence(validation.event.evidence);
         setVisibleEvidence(validation.event.evidence);
         appendLog({
@@ -454,6 +514,17 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
           outcome: "diagnostic",
           detail: describeVisibleEvidence(validation.event.evidence),
         });
+
+        if (validation.event.componentMode === "recovery-bootstrap") {
+          restorationSignalsRef.current.bootstrapEvent = validation.event;
+          setRestorationEvidence(
+            "fresh SANDBOX_READY accepted; waiting for current-client completion and null context error",
+          );
+          completeRestorationIfReady();
+          return;
+        }
+
+        initializationSignalsRef.current.visibleRuntimeReady = true;
         completeInitializationIfReady();
         return;
       }
@@ -512,6 +583,7 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
     appendLog,
     captureIframeSnapshot,
     completeInitializationIfReady,
+    completeRestorationIfReady,
     completeRunIfReady,
   ]);
 
@@ -540,22 +612,50 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
         );
       }
 
+      if (
+        currentRun.componentMode === "recovery-bootstrap" &&
+        summary.eventType === "SANDPACK:start"
+      ) {
+        restorationSignalsRef.current.compileStarted = true;
+        setRestorationEvidence(
+          "current client reported start for restored source; waiting for successful done, null context error, and fresh SANDBOX_READY",
+        );
+      }
+
       if (summary.compilationFailure) {
-        setRunInFlight(false);
         if (currentRun.componentMode === "invalid-compilation-probe") {
+          setRunInFlight(false);
           setGateState("compilation-diagnostic-error");
           setStateDetail(summary.detail);
           setCompilationClassification("provisional");
           setInvalidRuntimeBridgeObservation(
             "No correlated runtime-bridge event was observed for the invalid source.",
           );
-        } else {
-          setGateState(
-            currentRun.componentMode === "bootstrap"
-              ? "initialization-failure"
-              : "run-failure",
-          );
+          return;
+        }
+
+        if (currentRun.componentMode === "bootstrap") {
+          setRunInFlight(false);
+          setGateState("initialization-failure");
           setStateDetail(summary.detail);
+          return;
+        }
+
+        appendLog({
+          runId: currentRun.runId,
+          fixtureId: currentRun.fixtureId,
+          eventType: "UNATTRIBUTED_COMPILATION_ERROR_IGNORED",
+          outcome: "rejected",
+          detail:
+            "The listener error has no run correlation; the active run still requires its own completion and runtime evidence.",
+        });
+        if (currentRun.componentMode === "recovery-bootstrap") {
+          setStateDetail(
+            "An uncorrelated previous compilation error was ignored while verified source restoration continues.",
+          );
+          setRestorationEvidence(
+            "uncorrelated listener error ignored; recovery remains serialized and in flight",
+          );
         }
         return;
       }
@@ -570,10 +670,36 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
         return;
       }
 
+      if (currentRun.componentMode === "recovery-bootstrap") {
+        if (!restorationSignalsRef.current.compileStarted) {
+          appendLog({
+            runId: currentRun.runId,
+            fixtureId: currentRun.fixtureId,
+            eventType: "RECOVERY_DONE_BEFORE_START_REJECTED",
+            outcome: "rejected",
+            detail:
+              "A successful done signal was not accepted without a start for restored source.",
+          });
+          return;
+        }
+
+        restorationSignalsRef.current.clientDone = true;
+        setRestorationEvidence(
+          "current client reported successful done; waiting for null context error and fresh SANDBOX_READY",
+        );
+        completeRestorationIfReady();
+        return;
+      }
+
       runSignalsRef.current.clientDone = true;
       completeRunIfReady();
     },
-    [appendLog, completeInitializationIfReady, completeRunIfReady],
+    [
+      appendLog,
+      completeInitializationIfReady,
+      completeRestorationIfReady,
+      completeRunIfReady,
+    ],
   );
 
   useEffect(() => {
@@ -588,6 +714,12 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
         observedClient = currentClient;
         initializationSignalsRef.current.clientDone = false;
         runSignalsRef.current.clientDone = false;
+        restorationSignalsRef.current = {
+          compileStarted: false,
+          clientDone: false,
+          contextErrorCleared: sandpackErrorRef.current === null,
+          bootstrapEvent: null,
+        };
         unsubscribe = currentClient?.listen(handleSandpackMessage);
       }
 
@@ -599,9 +731,13 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
         if (activeRunRef.current.componentMode === "bootstrap") {
           initializationSignalsRef.current.clientDone = true;
           completeInitializationIfReady();
-        } else {
+        } else if (activeRunRef.current.componentMode === "valid") {
           runSignalsRef.current.clientDone = true;
           completeRunIfReady();
+        } else if (
+          activeRunRef.current.componentMode === "recovery-bootstrap"
+        ) {
+          completeRestorationIfReady();
         }
       }
     };
@@ -615,8 +751,42 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
     };
   }, [
     completeInitializationIfReady,
+    completeRestorationIfReady,
     completeRunIfReady,
     handleSandpackMessage,
+  ]);
+
+  useEffect(() => {
+    sandpackErrorRef.current = sandpack.error;
+
+    if (activeRun.componentMode === "valid" && sandpack.error === null) {
+      const completionCheck = window.setTimeout(completeRunIfReady, 0);
+
+      return () => window.clearTimeout(completionCheck);
+    }
+
+    if (activeRun.componentMode !== "recovery-bootstrap") {
+      return;
+    }
+
+    restorationSignalsRef.current.contextErrorCleared = sandpack.error === null;
+    if (sandpack.error !== null) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRestorationEvidence(
+        "Sandpack context error is null; waiting for current-client completion and fresh SANDBOX_READY",
+      );
+      completeRestorationIfReady();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    activeRun.componentMode,
+    completeRestorationIfReady,
+    completeRunIfReady,
+    sandpack.error,
   ]);
 
   useEffect(() => {
@@ -680,18 +850,20 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
         !sandboxReadyRef.current ||
         runInFlight ||
         !client ||
-        client.status !== "done"
+        client.status !== "done" ||
+        sandpack.error !== null ||
+        activeRunRef.current.componentMode === "invalid-compilation-probe"
       ) {
         setGateState("run-failure");
         setStateDetail(
-          "Fixture execution was blocked because the Sandpack client was not in the done state.",
+          "Fixture execution was blocked until the current client is done, the context error is null, and source restoration is verified.",
         );
         appendLog({
           runId: activeRunRef.current.runId,
           fixtureId: activeRunRef.current.fixtureId,
           eventType: "RUN_BLOCKED_NOT_READY",
           outcome: "rejected",
-          detail: `clientStatus=${client?.status ?? "unavailable"}`,
+          detail: `clientStatus=${client?.status ?? "unavailable"}; contextError=${describeSandpackContextError(sandpack.error)}; componentMode=${activeRunRef.current.componentMode}`,
         });
         return;
       }
@@ -765,6 +937,7 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
     setInvalidRuntimeBridgeObservation(
       "Waiting to determine whether invalid source starts the runtime bridge.",
     );
+    setRestorationEvidence("not started for the current invalid source");
     setRunInFlight(true);
     setGateState("compiling-current-run");
     setStateDetail(
@@ -790,7 +963,12 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
 
   const restoreValidComponent = () => {
     const client = previewRef.current?.getClient();
-    if (!client || client.status !== "done" || runInFlight) {
+    if (
+      !client ||
+      client.status !== "done" ||
+      runInFlight ||
+      activeRunRef.current.componentMode !== "invalid-compilation-probe"
+    ) {
       setGateState("run-failure");
       setStateDetail(
         "Valid-source restoration was blocked because the Sandpack client was not in the done state.",
@@ -801,11 +979,30 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
     const nextRun = createRun(
       "safe-short",
       activeRunRef.current.nonce,
-      "valid",
+      "recovery-bootstrap",
     );
+    const restoredFixtureSource = createCurrentFixtureFile(nextRun);
+    const restoredFiles = {
+      ...sandpack.files,
+      "/UserComponent.tsx": {
+        ...sandpack.files["/UserComponent.tsx"],
+        code: USER_COMPONENT_SOURCE,
+      },
+      "/current-fixture.ts": {
+        ...sandpack.files["/current-fixture.ts"],
+        code: restoredFixtureSource,
+      },
+    };
     activeRunRef.current = nextRun;
     runSignalsRef.current = { clientDone: false, renderEvent: null };
+    restorationSignalsRef.current = {
+      compileStarted: false,
+      clientDone: false,
+      contextErrorCleared: sandpack.error === null,
+      bootstrapEvent: null,
+    };
     completedRunIdRef.current = null;
+    completedRestorationRunIdRef.current = null;
     latestFixtureIdRef.current = "safe-short";
     setActiveRun(nextRun);
     setLatestFixtureId("safe-short");
@@ -814,33 +1011,46 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
     setObservedMessageOrigin(null);
     setSourceEqualitySucceeded(null);
     setRunInFlight(true);
-    setGateState("compiling-current-run");
-    setStateDetail(`Restoring valid component source for run ${nextRun.runId}.`);
+    setGateState("restoring-valid-source");
+    setStateDetail(
+      `Dispatching valid component source to the current Sandpack client for recovery run ${nextRun.runId}.`,
+    );
+    setRestorationEvidence(
+      "valid files queued in provider state and dispatched directly to the current done client",
+    );
     appendLog({
       runId: nextRun.runId,
       fixtureId: nextRun.fixtureId,
-      eventType: "VALID_SOURCE_RESTORED",
+      eventType: "CURRENT_CLIENT_RESTORE_DISPATCHED",
       outcome: "pending",
-      detail: "Restoring the accepted sample source and safe-short fixture.",
+      detail: `clientStatus=${client.status}; contextErrorBefore=${describeSandpackContextError(sandpack.error)}`,
     });
 
     sandpack.updateFile(
       {
         "/UserComponent.tsx": USER_COMPONENT_SOURCE,
-        "/current-fixture.ts": createCurrentFixtureFile(nextRun),
+        "/current-fixture.ts": restoredFixtureSource,
       },
       undefined,
-      true,
+      false,
     );
+    client.updateSandbox({ files: restoredFiles });
   };
 
   const currentClientDone = iframeSnapshot.clientStatus === "done";
-  const canRunFixture = sandboxReady && !runInFlight && currentClientDone;
+  const canRunFixture =
+    sandboxReady &&
+    !runInFlight &&
+    currentClientDone &&
+    sandpack.error === null &&
+    activeRun.componentMode !== "invalid-compilation-probe";
   const canRestoreValidComponent =
     !runInFlight &&
     currentClientDone &&
     activeRun.componentMode === "invalid-compilation-probe";
   const activeFixtureFile = sandpack.files["/current-fixture.ts"]?.code ?? "";
+  const validSourcePresentInProvider =
+    sandpack.files["/UserComponent.tsx"]?.code === USER_COMPONENT_SOURCE;
   const fixtureFileContainsActiveRun = activeFixtureFile.includes(activeRun.runId);
   const resolvedFiles = Object.keys(sandpack.files).sort();
 
@@ -1065,6 +1275,18 @@ function SandboxController({ initialRun }: { initialRun: SandboxRun }) {
           </dd>
           <dt className="font-medium text-amber-900">Runtime bridge</dt>
           <dd className="text-amber-950">{invalidRuntimeBridgeObservation}</dd>
+          <dt className="font-medium text-amber-900">
+            Restoration lifecycle
+          </dt>
+          <dd className="break-all font-mono text-amber-950">
+            {restorationEvidence}
+          </dd>
+          <dt className="font-medium text-amber-900">
+            Valid source in provider
+          </dt>
+          <dd className="font-mono text-amber-950">
+            {String(validSourcePresentInProvider)}
+          </dd>
         </dl>
       </section>
 

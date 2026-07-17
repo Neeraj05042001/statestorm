@@ -194,7 +194,10 @@ function RenderEvidenceReporter() {
         return;
       }
 
-      if (currentFixture.componentMode === "bootstrap") {
+      if (
+        currentFixture.componentMode === "bootstrap" ||
+        currentFixture.componentMode === "recovery-bootstrap"
+      ) {
         postEvent({
           ...baseEvent(),
           type: "SANDBOX_READY",
@@ -400,7 +403,11 @@ export function createCurrentFixtureFile(run: SandboxRun): string {
   runId: string;
   fixtureId: "safe-short" | "safe-long" | "runtime-crash";
   nonce: string;
-  componentMode: "bootstrap" | "valid" | "invalid-compilation-probe";
+  componentMode:
+    | "bootstrap"
+    | "valid"
+    | "recovery-bootstrap"
+    | "invalid-compilation-probe";
   props: {
     title: string;
     description: string;

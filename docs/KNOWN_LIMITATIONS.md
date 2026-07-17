@@ -35,15 +35,23 @@
     lifecycle failures below it. It does not contain infinite loops, resource
     exhaustion, arbitrary asynchronous callback failures or every browser API
     failure.
-12. **Compilation correlation is provisional and serialized.** The installed public context
-    exposes `SandpackError | null`, and installed listener types expose
-    `action/show-error` plus `done.compilatonError`. Listener messages have no
-    StateStorm nonce/run/fixture/mode fields. Only one run may execute at a time,
-    and their internal error wording is not a stable final contract.
+12. **Compilation correlation is provisional and serialized.** The installed
+    public context exposes `SandpackError | null`, and installed listener types
+    expose `action/show-error` plus `done.compilatonError`. Listener messages
+    have no StateStorm nonce/run/fixture/mode fields. Only one compile, recovery
+    or fixture run may execute at a time, and their internal error wording is not
+    a stable final contract. F4 ignores uncorrelated listener errors outside the
+    active invalid probe; that is a serialized Gate 0 accommodation, not final
+    correlation.
 13. **Invalid compilation retains prior DOM.** Because invalid source never
     starts the new runtime bridge, the iframe can continue showing the last valid
-    DOM. The parent correctly refuses to treat that stale run ID as current, but
-    this diagnostic is not a final preview-error user experience.
-14. **Public deployment is not verified.** Built `next start` execution passed at
-    `http://localhost:3100/gate-0`; it does not establish that a public deployed
-    network can reach every hosted Sandpack dependency.
+    DOM. The parent correctly refuses to treat that stale run ID as current and
+    now withholds controls until current-client compile completion, a null
+    context error and a fresh bootstrap are verified. This is still not a final
+    preview-error user experience.
+14. **The corrected public deployment is not verified.** The earlier deployed
+    build exhibited the compilation-recovery race. The corrected F4 build passed
+    development and built `next start` execution at
+    `http://localhost:3100/gate-0`, but has not been deployed and does not yet
+    prove that the public network can reach every hosted Sandpack dependency or
+    reproduce the verified recovery lifecycle.
