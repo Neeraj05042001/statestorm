@@ -156,6 +156,38 @@ or unresolved props issues, sanitized server failures, the Node.js server-only
 boundary and the unchanged Gate 0 route. The diagnostic UI remains temporary
 and is not the final StateStorm product design.
 
+## Gate 2 deterministic fixture-planning layer
+
+SS-M2-001 adds a pure planning layer under
+`src/planning/deterministic-fixtures`. It accepts only a runtime-validated
+`ComponentContract` and returns existing `Fixture` and `ContractIssue` domain
+values. It does not interpret the prompt, execute or import submitted source,
+assemble a full RunPlan or invoke the Gate 0 sandbox.
+
+Planning begins with one representative happy-path value per declared prop.
+Explicit compatible JSON defaults take priority; otherwise the fixed kind
+baseline is string `"Sample text"`, number `1`, boolean `true`, first enum value,
+empty array or empty object. Defaults and candidate props are deep-cloned so no
+mutable value is shared with the input contract or another fixture.
+
+Twelve named strategies run in a fixed priority order with stable `det-*` IDs:
+happy path, minimal required, three string boundaries, three number boundaries,
+boolean inversion, final enum values, empty collections and combined stress.
+Strategies vary prop groups rather than creating an unbounded Cartesian product.
+Every candidate retains all required props, only minimal-required may omit
+optional props, and no candidate invents an undeclared prop.
+
+Ordered candidates pass `FixtureSchema`, then nested canonical JSON comparison
+removes duplicate prop objects while preserving the first candidate. The first
+twelve unique fixtures are retained, and a stable warning reports any future
+truncation. Emitted fixtures are validated again after selection.
+
+This deterministic collection exists independently of future AI semantic
+fixtures. AI may later add prompt-specific values only through a separately
+authorized, runtime-validated planning step; deterministic fallback coverage
+does not depend on model availability. Arrays and objects use explicit defaults
+or empty containers until richer type-shape metadata exists.
+
 ## Verified Sandpack setup
 
 The provider uses the installed `react-ts` template with no `customSetup`.

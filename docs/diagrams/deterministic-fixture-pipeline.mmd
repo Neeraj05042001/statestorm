@@ -1,0 +1,6 @@
+flowchart LR
+  Contract["Validated ComponentContract"] --> Baseline["Representative baseline"]
+  Baseline --> Strategies["Ordered boundary strategies"]
+  Strategies --> Validation["JSON and FixtureSchema validation"]
+  Validation --> Deduplication["Canonical prop deduplication"]
+  Deduplication --> Limit["Maximum twelve deterministic fixtures"]

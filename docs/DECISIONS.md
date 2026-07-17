@@ -485,3 +485,74 @@
   0 regression evidence.
 - Current status: Formally accepted by the ChatGPT Project architecture
   authority. Gate 1 is passed and closed; no Gate 2 implementation has begun.
+
+## D-029: Generate a deterministic fixture baseline independently of AI
+
+- Recommendation: Always derive a bounded boundary-fixture collection directly
+  from a validated `ComponentContract`, without a model call.
+- Reason: StateStorm needs a reliable fallback and demo foundation when AI is
+  unavailable or later semantic output is rejected.
+- Alternatives considered: Wait for AI fixture generation or require hand-
+  authored fixtures.
+- Trade-off: Deterministic metadata-only values are less domain-specific.
+- Risk: Users could mistake boundary coverage for semantic requirement coverage.
+- Validation method: Identical-input equality, no-randomness inspection and
+  focused baseline/strategy tests.
+- Current status: Implemented by SS-M2-001; Gate 2 remains open.
+
+## D-030: Freeze deterministic fixture IDs and generation order
+
+- Recommendation: Use the documented `det-*` IDs and fixed candidate priority
+  for every identical component contract.
+- Reason: Stable IDs and order support repeatable RunPlan assembly, tests and
+  later execution correlation.
+- Alternatives considered: UUIDs, timestamps or sorting by generated values.
+- Trade-off: Adding or reprioritizing a strategy becomes an explicit contract
+  decision.
+- Risk: Downstream consumers may become coupled to these version-1 IDs.
+- Validation method: Exact ordered-ID assertions, unique-ID checks and repeated
+  generation equality.
+- Current status: Implemented for the SS-M2-001 baseline.
+
+## D-031: Vary prop groups instead of generating a Cartesian product
+
+- Recommendation: Apply each boundary strategy to all matching props together,
+  plus one combined-stress fixture.
+- Reason: A Cartesian product grows without bound and conflicts with the
+  accepted twelve-fixture RunPlan maximum.
+- Alternatives considered: One fixture per prop/value or all combinations.
+- Trade-off: A grouped failure may not identify which individual prop caused
+  the outcome.
+- Risk: Later diagnostic isolation may require targeted semantic fixtures.
+- Validation method: Strategy-specific prop assertions and maximum-count tests.
+- Current status: Accepted SS-M2-001 scope boundary.
+
+## D-032: Limit collection planning to defaults or empty containers
+
+- Recommendation: Reuse explicit JSON defaults and otherwise represent arrays
+  with `[]` and objects with `{}`.
+- Reason: `ComponentContract` records a flat kind and type text, not executable
+  nested shape metadata. Evaluating type text or guessing members would violate
+  the deterministic boundary.
+- Alternatives considered: Parse type text, invent nested values or omit
+  required collections.
+- Trade-off: Populated collection behavior is uncovered without an explicit
+  default.
+- Risk: Empty-only coverage may miss important nested rendering states.
+- Validation method: Collection boundary tests and one stable
+  `LIMITED_COLLECTION_FIXTURE_COVERAGE` warning.
+- Current status: Implemented; richer collection planning remains deferred.
+
+## D-033: Deduplicate before enforcing the twelve-fixture cap
+
+- Recommendation: Validate ordered candidates, compare their props through
+  canonical nested JSON, keep the first duplicate, then retain at most twelve.
+- Reason: Defaults can make later strategies identical to happy path; duplicates
+  should not consume the limited RunPlan fixture budget.
+- Alternatives considered: Compare raw `JSON.stringify` output, retain duplicate
+  states or truncate before deduplication.
+- Trade-off: A strategy ID disappears when it produces no distinct state.
+- Risk: Future canonicalization changes could alter which candidate survives.
+- Validation method: Nested property-order deduplication, first-wins, limit and
+  stable-warning tests.
+- Current status: Implemented for SS-M2-001.

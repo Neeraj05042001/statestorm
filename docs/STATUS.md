@@ -2,15 +2,35 @@
 
 ## Current work
 
-- Gate: Gate 1 (passed and formally accepted)
-- Task: SS-M1-003-F2 (complete)
-- State: Gate 1 accepted after local, built-production and public `/analyze` verification
+- Gate: Gate 2 (open)
+- Task: SS-M2-001 (active)
+- State: Deterministic fixture-planning implementation and local validation complete; architecture review pending
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
 - Latest accepted milestone: Gate 1 component-contract and server-analysis baseline
 - Gate 0 execution architecture: Frozen and unchanged
 - RunPlan version 1: Frozen and unchanged
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
+
+## Active SS-M2-001 evidence
+
+- `generateDeterministicFixtures` converts a validated `ComponentContract` into
+  existing runtime-validated `Fixture` values and stable `ContractIssue` data.
+- A representative happy path and eleven ordered boundary strategies use fixed
+  IDs, grouped prop variations, canonical nested deduplication and the accepted
+  twelve-fixture maximum.
+- Required props remain present, undeclared props are never added, defaults are
+  deeply cloned and every ordered candidate and emitted fixture passes
+  `FixtureSchema`.
+- Unknown prop kinds, incompatible defaults and invalid enum metadata fail
+  closed. Collections without defaults produce empty containers and one bounded
+  coverage warning.
+- Implementation evidence exists in focused baseline, strategy, invariant,
+  JSON-safety, deduplication and limit tests. All required commands pass; Gate 2
+  remains open pending architecture review.
+- No AI integration, prompt interpretation, requirement extraction, semantic
+  fixture generation, sandbox orchestration, state atlas, editing or UI was
+  added. The frozen Gate 0 and Gate 1 implementations are unchanged.
 
 ## Formally accepted Gate 1 outcome
 
@@ -219,7 +239,7 @@ compilation-error correlation contract.
 | --- | --- | --- |
 | `npm run lint` | Pass | ESLint completed with no errors or warnings |
 | `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
-| `npm run test` | Pass | Vitest 4.1.10 passed 106 tests across 8 files, including all existing 92 tests plus 14 API, service and response-schema tests |
+| `npm run test` | Pass | Vitest 4.1.10 passed 135 tests across 10 files, preserving all 106 prior tests and adding 29 deterministic fixture-planning tests |
 | `npm run build` | Pass | Next.js 16.2.10 compiled, TypeScript passed, `/`, `/_not-found`, `/analyze` and `/gate-0` were statically prerendered, and `/api/component-analysis` was emitted as a dynamic route |
 | `npm run start -- -p 3100` | Pass | Final Next.js production server became ready in 2.9 seconds at `http://localhost:3100`; accepted, rejected and malformed API requests plus the full Edge UI sequence and `/gate-0` passed |
 
@@ -240,11 +260,11 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No blocker remains for the accepted Gate 1 baseline. The documented source
-subset, RunPlan version 1 and server-only analysis boundaries remain binding.
-No Gate 2 implementation has begun.
+No blocker affects the SS-M2-001 implementation. Gate 2 remains open, and the
+frozen Gate 0, Gate 1 and RunPlan version 1 boundaries remain binding.
 
 ## Next permitted action
 
-Requirement extraction and fixture planning, only under a separately authorized
-task packet. No Gate 2 implementation has begun in this closure task.
+Architecture review of the deterministic fixture-planning evidence. Do not
+begin requirement extraction, AI semantic fixture generation, RunPlan assembly,
+sandbox orchestration or another task without separate authorization.

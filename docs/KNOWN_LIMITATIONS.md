@@ -114,3 +114,20 @@
 34. **Analysis triggers no AI or execution.** Submitting the form does not plan
    requirements, generate fixtures, execute Sandpack, produce a state atlas or
    edit the component.
+35. **No populated collection generation without defaults.** Array and object
+   props use their explicit JSON defaults or empty containers. Flat kind and
+   type-text metadata is insufficient to invent safe nested values.
+36. **No semantic domain values.** Deterministic fixtures use generic boundary
+   representatives and do not interpret the prompt or infer business-specific
+   states such as realistic prices, names or statuses.
+37. **Grouped strategies reduce isolation.** Each boundary strategy varies all
+   props of a matching kind together. A failing grouped fixture may not identify
+   one individual prop as the cause.
+38. **Maximum twelve deterministic fixtures.** Fixed priority and canonical
+   deduplication keep only the first twelve unique candidates. Broader coverage
+   requires an explicit future planning decision.
+39. **Prompt interpretation remains absent.** `ComponentSubmission.prompt` is
+   required by the accepted contract but is not consumed by deterministic
+   fixture planning.
+40. **Deterministic fixtures are not executed.** SS-M2-001 does not assemble a
+   complete RunPlan, connect fixtures to Sandpack or produce browser evidence.
