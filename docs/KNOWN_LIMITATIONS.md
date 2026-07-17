@@ -97,5 +97,20 @@
     `Program`, invoke the type checker, resolve modules or prove body-level type
     correctness.
 29. **Complex type composition is unsupported.** Inherited interfaces,
-    intersections, conditional and mapped types, indexed access, generic type
-    parameters, non-literal unions and recursive object types fail closed.
+   intersections, conditional and mapped types, indexed access, generic type
+   parameters, non-literal unions and recursive object types fail closed.
+30. **Analysis requires the application server.** `/analyze` calls the Node.js
+   application route; the deterministic analyzer is intentionally unavailable
+   when that server cannot be reached.
+31. **No offline browser-only analysis.** The TypeScript Compiler API and source
+   analyzer remain server-only and are not shipped to the client for offline
+   use.
+32. **Analysis input is not persisted.** Prompt, component source and result
+   live only in browser memory and the current request. A reload loses them, and
+   there is no history, sharing or recovery mechanism.
+33. **The frozen source subset still applies.** The submission page does not
+   expand analyzer support beyond named, self-contained components with local
+   JSON-compatible props and the documented import restrictions.
+34. **Analysis triggers no AI or execution.** Submitting the form does not plan
+   requirements, generate fixtures, execute Sandpack, produce a state atlas or
+   edit the component.

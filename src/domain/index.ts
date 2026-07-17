@@ -1,3 +1,4 @@
+export * from "./component-analysis-api";
 export * from "./component-contract";
 export * from "./component-submission";
 export * from "./contract-issue";

@@ -1,0 +1,6 @@
+flowchart LR
+  Browser["Browser analysis form"] -->|"POST /api/component-analysis"| Route["Node.js Route Handler"]
+  Route --> Adapter["server-only analysis adapter"]
+  Adapter --> Analyzer["TypeScript AST analyzer"]
+  Analyzer --> Result["ComponentContract or ContractIssues"]
+  Result --> BrowserResult["Browser diagnostic result"]

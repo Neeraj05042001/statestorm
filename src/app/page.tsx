@@ -13,7 +13,13 @@ export default function Home() {
         The current route is a diagnostic architecture spike for a provisional
         browser-isolated execution candidate. Gate 0 is not yet accepted.
       </p>
-      <div>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/analyze"
+          className="inline-flex rounded-md bg-sky-700 px-4 py-2.5 font-medium text-white hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+        >
+          Analyze a component
+        </Link>
         <Link
           href="/gate-0"
           className="inline-flex rounded-md bg-slate-950 px-4 py-2.5 font-medium text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"

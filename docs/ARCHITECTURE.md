@@ -107,6 +107,35 @@ checking. No `Program`, type checker, module resolver, JSDoc inference or
 dependency graph is created. The full pipeline and supported subset are
 recorded in `docs/SOURCE_ANALYSIS.md`.
 
+## Gate 1 server-only analysis boundary
+
+SS-M1-003 connects the deterministic analyzer through one explicit request
+path:
+
+`browser form -> POST /api/component-analysis -> Node.js server-only adapter -> analyzer -> validated response`
+
+The browser owns form state, creates a URL-safe request ID, sends the strict
+`ComponentSubmission` JSON value and renders the returned diagnostic contract
+or issues. It does not import the analyzer or TypeScript Compiler API. The
+shared client-safe response schema reuses `ComponentContractSchema` and
+`ContractIssueSchema` without importing anything from `src/analysis`.
+
+The Route Handler explicitly selects the Node.js runtime. It safely parses and
+validates JSON, treats unsupported source as a normal HTTP 200 analysis outcome,
+and maps malformed input or unexpected failures to bounded schema-valid issues.
+Responses are `no-store` and never contain raw TypeScript diagnostics, `Error`
+objects or stack traces.
+
+The dedicated service under `src/server/component-analysis` is marked with
+`import "server-only"`. It revalidates the submission, invokes the accepted
+analyzer and validates the final API response. Submitted code remains an
+in-memory string: the service never executes it, imports it, loads a submitted
+module or writes it to the filesystem.
+
+The `/analyze` page is deliberately a minimal diagnostic workflow. It does not
+persist input, invoke AI, generate fixtures, integrate with Sandpack or change
+the frozen Gate 0 runtime.
+
 ## Verified Sandpack setup
 
 The provider uses the installed `react-ts` template with no `customSetup`.

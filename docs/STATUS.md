@@ -3,14 +3,59 @@
 ## Current work
 
 - Gate: Gate 1 (open)
-- Task: SS-M1-002-F1 (complete)
-- State: SS-M1-002 accepted; deterministic source-analysis baseline established
+- Task: SS-M1-003-F1 (active)
+- State: SS-M1-003 conditionally accepted; local and built-production verification complete; public Vercel verification pending
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: SS-M1-002 deterministic source-analysis baseline
+- Latest accepted milestone: SS-M1-003 server-only analysis workflow (conditional)
 - Gate 0 execution architecture: Frozen and unchanged
 - RunPlan version 1: Frozen and unchanged
-- Gate 1 scope implemented so far: Accepted domain contracts and deterministic source analysis
+- Gate 1 scope implemented so far: Accepted domain contracts and deterministic source analysis; conditionally accepted server-only submission workflow
+
+## Conditionally accepted SS-M1-003 evidence
+
+- `/analyze` provides prompt, component source and TSX/JSX inputs, explicit
+  idle/submitting/accepted/rejected/request-error/server-error states, a
+  supported example and diagnostic contract/issue presentation.
+- The browser submits a UUID-based URL-safe ID through
+  `POST /api/component-analysis`. The Node.js Route Handler validates the strict
+  submission schema before calling a dedicated `server-only` adapter.
+- The adapter invokes the accepted deterministic analyzer and validates the
+  final discriminated response schema. Unsupported source is a normal HTTP 200
+  analysis result; malformed input is HTTP 400; unexpected failures are a
+  sanitized HTTP 500.
+- The new connection does not execute submitted source and does not import the
+  analyzer or TypeScript runtime into a client-transitive module.
+- No AI integration, requirement extraction, fixture generation, sandbox
+  execution integration, detector, editor, state atlas, persistence or database
+  was added. Gate 0 remains frozen and unchanged.
+- SS-M1-003 is locally and built-production verified. Public Vercel verification
+  remains pending, and Gate 1 remains open.
+- No AI integration, requirement extraction, fixture generation or sandbox
+  execution integration has begun.
+
+## SS-M1-003 development and built-server evidence
+
+- Headless Edge completed the development UI sequence: open `/analyze`, load
+  the exact built-in `ProductCard` example, submit it, observe the accepted
+  four-prop contract and `calm` default, replace it with an unsupported import,
+  observe `UNSUPPORTED_IMPORT`, add invalid syntax and observe
+  `SOURCE_SYNTAX_ERROR`. The page retained its heading with zero runtime
+  exceptions, and direct `/gate-0` navigation loaded successfully.
+- Development API checks returned HTTP 200 for accepted source, HTTP 200 with
+  `UNSUPPORTED_IMPORT`, HTTP 200 with `SOURCE_SYNTAX_ERROR`, and HTTP 400 with
+  `MALFORMED_JSON`. Every response used the no-store policy.
+- `npm run start -- -p 3100` served the final optimized build in 2.9 seconds.
+  Headless Edge repeated the full example, unsupported-import, syntax-error and
+  `/gate-0` sequence with zero runtime exceptions. Direct API checks also
+  confirmed accepted, unsupported, syntax and malformed response behavior.
+- Successful accepted analysis on the optimized server proves that its Node.js
+  API bundle resolves and runs TypeScript 5.9.3. Build artifacts contain
+  TypeScript/analyzer markers in server chunks and zero matching analyzer or
+  TypeScript-runtime markers in `.next/static` client chunks.
+- Client-transitive source imports were also audited: `/analyze` imports only
+  client-safe domain schemas and types, never `src/analysis`, `src/server` or
+  `typescript`.
 
 ## Accepted SS-M1-002 evidence
 
@@ -150,9 +195,9 @@ compilation-error correlation contract.
 | --- | --- | --- |
 | `npm run lint` | Pass | ESLint completed with no errors or warnings |
 | `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
-| `npm run test` | Pass | Vitest 4.1.10 passed 92 tests across 5 files, including all existing RunPlan tests |
-| `npm run build` | Pass | Next.js 16.2.10 compiled, TypeScript passed, and `/`, `/_not-found` and `/gate-0` were statically prerendered |
-| `npm run start -- -p 3100` | Pass | Next.js production server became ready in 995 ms at `http://localhost:3100` |
+| `npm run test` | Pass | Vitest 4.1.10 passed 106 tests across 8 files, including all existing 92 tests plus 14 API, service and response-schema tests |
+| `npm run build` | Pass | Next.js 16.2.10 compiled, TypeScript passed, `/`, `/_not-found`, `/analyze` and `/gate-0` were statically prerendered, and `/api/component-analysis` was emitted as a dynamic route |
+| `npm run start -- -p 3100` | Pass | Final Next.js production server became ready in 2.9 seconds at `http://localhost:3100`; accepted, rejected and malformed API requests plus the full Edge UI sequence and `/gate-0` passed |
 
 ## Accepted limitations and remaining risks
 
@@ -171,13 +216,12 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No blocker remains for the accepted SS-M1-002 baseline. Gate 1 remains open,
-and the documented source subset and RunPlan version 1 boundaries remain
-binding.
+No local blocker remains for the conditionally accepted SS-M1-003 baseline.
+Public Vercel verification remains pending. Gate 1 remains open, and the
+documented source subset and RunPlan version 1 boundaries remain binding.
 
 ## Next permitted action
 
-Server-only analyzer integration and the component submission workflow. Do not
-begin AI integration, requirement extraction, fixture generation, sandbox
-execution integration or another milestone without a separately authorized task
-packet.
+Public Vercel verification of the committed SS-M1-003 workflow. Do not begin AI
+integration, requirement extraction, fixture generation, sandbox execution
+integration or another milestone without a separately authorized task packet.

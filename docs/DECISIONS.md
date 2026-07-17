@@ -388,13 +388,70 @@
 - Trade-off: The component submission workflow requires an explicit Route
   Handler, Server Action or equivalent server boundary and a serializable
   request/result contract.
-- Risk: The analyzer is currently unwired, so the production build does not yet
-  prove that the deployed server runtime bundles or resolves the direct
-  TypeScript dependency. Integration must verify that behavior before the new
-  workflow is accepted.
+- Risk: The workflow requires a reachable application server and ships the
+  TypeScript runtime in the server build. Deployment-specific runtime and size
+  behavior still require verification when this milestone is deployed.
 - Validation method: Inspect the client dependency graph for analyzer and
   `typescript` imports, build the connected production application, and verify
   the deployed server-only analysis request without shipping TypeScript to the
   client.
-- Current status: Accepted integration constraint. No server adapter or
-  component submission workflow is implemented in SS-M1-002.
+- Current status: Implemented by SS-M1-003 through the dedicated
+  `src/server/component-analysis` adapter. Production build and local built-
+  server verification are required before architecture acceptance.
+
+## D-024: Use a Node.js Route Handler as the explicit analyzer boundary
+
+- Recommendation: Accept component analysis only through
+  `POST /api/component-analysis`, explicitly configured for the Node.js runtime.
+- Reason: The browser needs a narrow serializable boundary while the analyzer
+  requires the server-scoped TypeScript Compiler API.
+- Alternatives considered: Direct client analyzer import, Server Action or a
+  generic service framework.
+- Trade-off: Analysis requires a round trip to the application server.
+- Risk: A missing server or deployment bundling failure makes analysis
+  unavailable even though the form can load.
+- Validation method: Route tests, production build artifact inspection and a
+  successful built-server API request.
+- Current status: Implemented for SS-M1-003; Gate 1 remains open.
+
+## D-025: Treat unsupported source as a normal analysis result
+
+- Recommendation: Return HTTP 200 with `accepted: false` and validated issues
+  when a well-formed submission is outside the frozen source subset.
+- Reason: Unsupported syntax is an expected deterministic result, not an
+  infrastructure failure.
+- Alternatives considered: HTTP 4xx or 500 for analyzer rejections.
+- Trade-off: Callers must inspect the discriminant rather than infer support
+  from the HTTP status alone.
+- Risk: Clients that ignore the response schema could misread a 200 response.
+- Validation method: Service, Route Handler and built-server unsupported-import
+  checks.
+- Current status: Implemented for SS-M1-003.
+
+## D-026: Do not persist component-analysis submissions
+
+- Recommendation: Keep prompt and source only in browser state and the current
+  request. Add no timestamps, database or server-side submission store.
+- Reason: Persistence is not required to prove the server-only analyzer
+  boundary and would expand privacy and product scope.
+- Alternatives considered: Local storage, server session or database records.
+- Trade-off: Reloading the page loses the form contents and results.
+- Risk: Users cannot recover or share a prior analysis.
+- Validation method: Code inspection for storage, database and filesystem-write
+  paths.
+- Current status: Accepted SS-M1-003 scope boundary.
+
+## D-027: Use a minimal diagnostic UI before product workflow design
+
+- Recommendation: Present the submitted fields, accepted contract table and
+  actionable issues without adding final visual polish or editing/execution
+  features.
+- Reason: This milestone validates the request boundary and analyzer result,
+  not the final StateStorm interaction design.
+- Alternatives considered: Full editor, state atlas or integrated Sandpack
+  preview.
+- Trade-off: The page is useful for verification but intentionally limited.
+- Risk: It must not be mistaken for the complete StateStorm workflow.
+- Validation method: Development and built-server checks for every required UI
+  state and the supported example.
+- Current status: Implemented for SS-M1-003; final product UI is deferred.
