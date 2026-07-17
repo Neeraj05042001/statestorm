@@ -178,3 +178,120 @@
   and the public deployment at `https://statestorm.vercel.app/gate-0`.
 - Current status: Accepted by the ChatGPT Project architecture authority. Gate 0
   is passed and closed; no Gate 1 implementation has begun.
+
+## D-011: Use Zod as the runtime contract system
+
+- Recommendation: Define each Gate 1 domain contract as a Zod schema and export
+  its TypeScript type through `z.infer`.
+- Reason: One runtime source of truth prevents handwritten validation and static
+  types from drifting.
+- Alternatives considered: TypeScript interfaces with manual guards, JSON
+  Schema generation or a second validation library.
+- Trade-off: Domain modules depend on Zod and schema composition conventions.
+- Risk: Library upgrades can change diagnostics or inferred types and require
+  explicit contract-version review.
+- Validation method: Runtime acceptance/rejection tests, strict type-checking
+  and field-path assertions.
+- Current status: Accepted as part of the RunPlan version 1 contract baseline;
+  Gate 1 remains open.
+
+## D-012: Restrict executable props to JSON values
+
+- Recommendation: Permit only recursive JSON-compatible values in fixture
+  props, defaults, enum values and assertion values.
+- Reason: JSON data serializes deterministically and cannot smuggle executable
+  callbacks or JSX into the execution boundary.
+- Alternatives considered: Structured clone values, ReactNode, functions or
+  source-string callbacks.
+- Trade-off: Callbacks, Date, Map, Set, bigint and ReactNode props are excluded.
+- Risk: Some otherwise valid React components cannot be represented by contract
+  version 1.
+- Validation method: Accept nested JSON and reject every named non-JSON value,
+  including non-finite numbers and class instances.
+- Current status: Accepted for contract version 1.
+
+## D-013: Use a React-only import allowlist
+
+- Recommendation: Allow `react` and tooling-required `react/jsx-runtime`; reject
+  relative, alias and all other package imports.
+- Reason: The first supported contract must be self-contained and compatible
+  with the frozen React-only Sandpack baseline.
+- Alternatives considered: Arbitrary npm dependencies, repository-relative
+  modules or configurable aliases.
+- Trade-off: Components that depend on local files, design systems or other
+  packages are unsupported.
+- Risk: The supported component population is intentionally narrow.
+- Validation method: Schema tests for allowed React specifiers and rejected
+  package, relative and alias specifiers.
+- Current status: Accepted for contract version 1.
+
+## D-014: Version and serialize RunPlan
+
+- Recommendation: Require `version: 1`, strict schemas and a lossless JSON
+  serialize/parse round trip for every RunPlan.
+- Reason: Execution and future persistence need an explicit, portable contract
+  rather than in-memory application objects.
+- Alternatives considered: Unversioned TypeScript objects or executable plan
+  fields.
+- Trade-off: Contract evolution requires deliberate versioning and migration
+  decisions.
+- Risk: Version 1 may need replacement rather than silent extension when real
+  component inputs are broader.
+- Validation method: Strict parsing, JSON-boundary refinement and round-trip
+  equality tests.
+- Current status: Accepted for RunPlan version 1.
+
+## D-015: Limit each RunPlan to twelve serialized fixtures
+
+- Recommendation: Require at least one and at most twelve fixtures, with unique
+  IDs and JSON-only props.
+- Reason: A bounded MVP plan avoids unreviewed execution fan-out and keeps the
+  serialized artifact inspectable.
+- Alternatives considered: Unbounded fixtures or a larger arbitrary limit.
+- Trade-off: Plans needing broader combinatorial coverage must be split or
+  deferred.
+- Risk: Twelve is an MVP operational bound, not a measured universal optimum.
+- Validation method: Boundary schema tests, including rejection of thirteen
+  fixtures.
+- Current status: Accepted for RunPlan version 1.
+
+## D-016: Defer execution-result contracts
+
+- Recommendation: Stop at validated RunPlan data and executability
+  classification; define execution requests and results in a later authorized
+  architecture task.
+- Reason: Gate 1 must establish inputs before coupling them to the frozen Gate 0
+  sandbox or future detectors.
+- Alternatives considered: Add a RunPlan executor, detector outputs or sandbox
+  event mappings in SS-M1-001.
+- Trade-off: A validated executable plan cannot yet be run through this new
+  domain layer.
+- Risk: Later execution evidence may require an explicitly versioned RunPlan
+  successor or companion contract.
+- Validation method: Dependency inspection confirms `src/domain` has no sandbox
+  imports and tests call no executor.
+- Current status: Accepted scope boundary for SS-M1-001; result contracts remain
+  deferred.
+
+## D-017: Accept the RunPlan version 1 contract baseline
+
+- Recommendation: Accept the strict, versioned SS-M1-001 domain schemas,
+  cross-field validation and separate executability classification as the
+  RunPlan version 1 baseline.
+- Reason: The baseline defines one runtime-validated JSON boundary for supported
+  component metadata, requirements, fixtures and contract issues without
+  coupling the domain layer to execution.
+- Alternatives considered: Continue with unversioned TypeScript-only objects,
+  defer acceptance until execution integration or expand version 1 to broader
+  component inputs.
+- Trade-off: The accepted contract is deliberately limited to self-contained
+  React components, allowlisted imports, JSON values and at most twelve
+  fixtures.
+- Risk: Source-analysis and execution evidence may require an explicitly
+  versioned successor rather than silently extending version 1.
+- Validation method: Runtime schema tests, concrete issue-path assertions,
+  executability tests, JSON round-trip tests, lint, strict type-checking and a
+  production build.
+- Current status: Accepted by the ChatGPT Project architecture authority. Gate 1
+  remains open, and the next permitted work is source-code analysis into
+  `ComponentContract`.

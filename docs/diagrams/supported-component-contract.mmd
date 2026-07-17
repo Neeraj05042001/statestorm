@@ -1,0 +1,13 @@
+flowchart LR
+  A["User submission"] --> B["ComponentSubmissionSchema"]
+  B --> C{"Submission valid?"}
+  C -- "No" --> R["Rejected with field paths"]
+  C -- "Yes" --> D["ComponentContract metadata"]
+  D --> E["Requirements and fixtures"]
+  E --> F["RunPlanSchema version 1"]
+  F --> G{"Structural and cross-field validation"}
+  G -- "Invalid" --> R
+  G -- "Valid" --> H{"Error-severity ContractIssue?"}
+  H -- "Yes" --> I["Accepted data; non-executable"]
+  H -- "No" --> J["Accepted executable contract"]
+  J --> K["Execution deferred"]

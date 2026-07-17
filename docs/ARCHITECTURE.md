@@ -62,6 +62,26 @@ built-production and public verification at
 - restoration of React Strict Mode or replacement of the incompatible client
   lifecycle
 
+## Gate 1 domain-contract layer
+
+SS-M1-001 adds a domain layer under `src/domain` before any execution adapter.
+Zod runtime schemas define `ComponentSubmission`, `ComponentContract`,
+`PropDefinition`, `Requirement`, `Fixture`, `ContractIssue` and versioned
+`RunPlan` data. Their TypeScript types are inferred from the schemas rather than
+maintained separately.
+
+The layer accepts manually supplied metadata, enforces the React import
+allowlist and JSON-only executable values, and performs RunPlan cross-field
+validation. Structural validation is separate from executability: a plan with
+an error-severity `ContractIssue` is valid serialized data but is classified as
+non-executable.
+
+This layer is deliberately separated from the frozen Gate 0 execution path.
+There is no source parser, inference service, AI call, fixture generator,
+requirement evaluator, RunPlan-to-Sandpack adapter or execution-result contract.
+Nothing in `src/domain` imports the sandbox spike, and Gate 0 behavior is
+unchanged.
+
 ## Verified Sandpack setup
 
 The provider uses the installed `react-ts` template with no `customSetup`.

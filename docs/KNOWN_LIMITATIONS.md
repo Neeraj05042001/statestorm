@@ -57,3 +57,25 @@
 15. **Gate 0 is not production certification.** Acceptance proves the scoped
     hackathon MVP feasibility baseline only. It does not remove any limitation
     above or certify the iframe for hostile submitted code.
+16. **React-only component import contract.** Contract version 1 allows only
+    `react` and tooling-required `react/jsx-runtime`. Relative modules, aliases
+    and arbitrary package dependencies are rejected.
+17. **Executable props are JSON-only.** Callbacks, functions, JSX, ReactNode,
+    Date, Map, Set, bigint, class instances and non-finite numbers cannot appear
+    in fixtures or other executable values.
+18. **Self-contained component scope.** Components that require local files,
+    styles imported from modules, design systems or other npm packages are not
+    representable by the current contract.
+19. **Metadata is supplied manually.** SS-M1-001 validates submission,
+    component, prop, requirement, fixture, issue and RunPlan metadata but does
+    not derive it from source code.
+20. **No source inference or AI generation exists.** There is no parser, AST
+    analysis, prop inference, requirement extraction, fixture generator or
+    OpenAI integration in the implemented domain layer.
+21. **Execution integration is deferred.** A validated executable RunPlan is a
+    data classification only; no RunPlan-to-Sandpack adapter or versioned
+    execution-result contract exists yet.
+22. **Dependency audit findings remain open.** `npm audit` reports two moderate
+    dependency findings. They are non-blocking for the accepted RunPlan version
+    1 baseline, and no forced dependency upgrade was performed. They require a
+    separately authorized dependency review before production certification.
