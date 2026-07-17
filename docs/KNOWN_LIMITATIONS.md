@@ -7,10 +7,11 @@
    `data.jsdelivr.com`, `cdn.jsdelivr.net` and
    `prod-packager-packages.codesandbox.io`. Network policy, availability or rate
    limits can prevent initialization.
-3. **Unresolved collector timeout.** Supplied browser evidence showed
+3. **Non-blocking external telemetry timeout.** Browser evidence showed
    `POST https://col.csbops.io/data/sandpack` failing with
-   `ERR_CONNECTION_TIMED_OUT`. Successful automated runs did not reproduce that
-   request, so its impact is not frozen.
+   `ERR_CONNECTION_TIMED_OUT`. Public verification proved that safe rendering,
+   runtime recovery and compiler recovery still succeed when it occurs. It
+   remains external console noise and a network limitation.
 4. **Development Strict Mode is disabled temporarily.** Sandpack 2.20.0 client
    registration was unstable under development effect replay. Disabling Strict
    Mode stabilized the current client, but removes React's development-only
@@ -49,9 +50,10 @@
     now withholds controls until current-client compile completion, a null
     context error and a fresh bootstrap are verified. This is still not a final
     preview-error user experience.
-14. **The corrected public deployment is not verified.** The earlier deployed
-    build exhibited the compilation-recovery race. The corrected F4 build passed
-    development and built `next start` execution at
-    `http://localhost:3100/gate-0`, but has not been deployed and does not yet
-    prove that the public network can reach every hosted Sandpack dependency or
-    reproduce the verified recovery lifecycle.
+14. **Public verification is point-in-time evidence.** Gate 0 passed at
+    `https://statestorm.vercel.app/gate-0`, including hosted dependency access
+    and compiler recovery. That does not guarantee future CodeSandbox service
+    availability, immutable hosted versions or production readiness.
+15. **Gate 0 is not production certification.** Acceptance proves the scoped
+    hackathon MVP feasibility baseline only. It does not remove any limitation
+    above or certify the iframe for hostile submitted code.

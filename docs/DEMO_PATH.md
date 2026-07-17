@@ -46,7 +46,8 @@ secrets are required.
 4. Confirm no current correlated runtime-bridge event was accepted. The iframe
    may retain the previous valid DOM, which has the previous run ID.
 5. Click **Restore valid sample component**. Wait for the current client to
-   return to `done` and for `safe-short` to render visibly.
+   report a fresh `start` and successful `done`, the context error to become
+   null, a fresh `SANDBOX_READY` event and `Compiler recovery verified`.
 6. Run **Run safe short fixture** once more. Confirm a new correlated visible
    success without a parent refresh or provider remount.
 
@@ -68,4 +69,27 @@ timeout and must not be reported as a run timeout.
 Record the exact URL, browser/version, parent state and run IDs, heartbeat value,
 iframe text/run attributes, parent console exceptions and relevant network
 failures. Direct built-server `/gate-0` navigation must succeed. Public deployment
-is not verified by this sequence.
+was accepted at `https://statestorm.vercel.app/gate-0`; repeat the same evidence
+path after any separately authorized execution-boundary change.
+
+## Gate 0 accepted verification path
+
+This is the technical evidence path accepted by the ChatGPT Project architecture
+authority. It is not the final hackathon product demo.
+
+1. Run **Run safe short fixture** and confirm visible correlated success.
+2. Run **Run safe long fixture** and confirm visibly different correlated
+   content.
+3. Run **Run runtime crash fixture** and confirm the isolated `RUNTIME_ERROR`.
+4. Increment the parent heartbeat from 0 to 1 while the crash fallback remains
+   contained.
+5. Run a safe fixture without refreshing and confirm visible recovery with the
+   heartbeat still at 1.
+6. Click **Inject invalid TSX probe** and confirm the provisional compilation
+   diagnostic while any previous iframe DOM is treated as stale.
+7. Click **Restore valid sample component**; do not start another fixture while
+   restoration remains in flight.
+8. Wait for `Compiler recovery verified`, proving current-client start,
+   successful completion, null context error and a fresh bootstrap event.
+9. Run a final valid fixture and confirm a new correlated visible render without
+   refreshing the parent page.

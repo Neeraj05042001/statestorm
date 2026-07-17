@@ -13,12 +13,13 @@
 - Risk: The current iframe is not a hardened malicious-code sandbox.
 - Validation method: Production build, client-only dynamic import inspection and
   protocol/source-window browser checks.
-- Current status: Accepted.
+- Current status: Accepted for the hackathon MVP, including execution in the
+  selected cross-origin Sandpack iframe. This is not a malicious-code guarantee.
 
 ## D-002: Use Sandpack as the hackathon MVP execution candidate
 
 - Recommendation: Use Sandpack as the selected browser-isolated execution
-  candidate for the hackathon MVP.
+  engine for the hackathon MVP.
 - Reason: F1 proves repeatable valid rendering, and F2 proves local runtime
   containment plus built-server recovery without adding a second bundler.
 - Alternatives: Custom Babel/esbuild iframe compiler, WebContainers or server
@@ -28,9 +29,9 @@
 - Risk: External availability, client lifecycle fragility and unresolved
   security properties.
 - Validation method: Gate 0 valid/crash/recovery/compile/deployment sequences.
-- Current status: Accepted by the ChatGPT Project architecture authority for the
-  hackathon MVP. Public deployment verification and later security hardening
-  remain open.
+- Current status: Accepted by the ChatGPT Project architecture authority as the
+  hackathon MVP execution engine after public deployment verification. Later
+  security hardening remains open.
 
 ## D-003: Use the Next.js App Router shell
 
@@ -151,5 +152,29 @@
 - Validation method: In development and built production mode, run two invalid
   TSX/restoration cycles, require all four recovery signals, then visibly render
   `safe-short` and `safe-long` while preserving the parent heartbeat.
-- Current status: Implemented for Gate 0. Public verification of the corrected
-  build remains pending; Gate 0 remains open.
+- Current status: Accepted for Gate 0 after public verification of compiler
+  recovery and a subsequent valid render.
+
+## D-010: Accept Gate 0 sandbox feasibility baseline
+
+- Recommendation: Accept the documented Next.js parent and cross-origin
+  Sandpack `react-ts` execution path as the StateStorm hackathon MVP sandbox
+  feasibility baseline.
+- Reason: Local development, built-production and public deployment evidence
+  proved visible fixture rendering, correlated runtime-error containment,
+  parent heartbeat survival, runtime recovery, provisional compilation
+  diagnostics and verified compiler recovery followed by a valid rerender.
+- Alternatives considered: Replace Sandpack before the MVP, execute submitted
+  code in the parent or server, or keep Gate 0 open pending post-hackathon
+  security and resource-containment work.
+- Trade-off: The MVP gains a proven execution path quickly while retaining a
+  hosted dependency, strictly serialized runs and provisional compilation
+  correlation.
+- Risk: Gate 0 acceptance does not provide malicious-code hardening, resource-
+  exhaustion containment, general component support or production security
+  certification. `reactStrictMode: false` remains a temporary accommodation.
+- Validation method: Run the accepted short/long/crash/heartbeat/recovery and
+  invalid-source/compiler-recovery sequence in development, built production
+  and the public deployment at `https://statestorm.vercel.app/gate-0`.
+- Current status: Accepted by the ChatGPT Project architecture authority. Gate 0
+  is passed and closed; no Gate 1 implementation has begun.

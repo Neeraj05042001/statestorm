@@ -2,11 +2,10 @@
 
 ## Status
 
-Sandpack is the accepted **browser-isolated execution candidate** for the
-hackathon MVP. F1 and F2 are accepted. Local runtime containment, provisional
-compilation classification, deterministic compilation recovery and built
-production-server execution are proven; Gate 0 remains open pending public
-verification of the corrected build.
+Sandpack is the accepted **browser-isolated execution engine** for the scoped
+hackathon MVP. Gate 0 is formally accepted after local development,
+built-production and public verification at
+`https://statestorm.vercel.app/gate-0`.
 
 ## Current shell
 
@@ -17,6 +16,51 @@ verification of the corrected build.
   `@codesandbox/sandpack-client` 2.19.8
 - `/gate-0` is statically prerendered, while Sandpack is loaded through a client
   component and `next/dynamic` with `ssr: false`
+
+## Accepted Gate 0 baseline
+
+### Accepted MVP architecture
+
+- The Next.js application owns the parent UI and parent-only state. Submitted
+  component code never executes in the parent or during server rendering.
+- Sandpack's `react-ts` template executes the hardcoded component in a
+  cross-origin CodeSandbox iframe.
+- Explicit virtual files define the component, JSON-serialized fixture, runtime
+  bridge, application wrapper, React entry, HTML root and preview styles.
+- Compilation, recovery and fixture runs are strictly serialized.
+- The runtime bridge emits bounded structured events. The parent accepts them
+  only after protocol, nonce, run, fixture, component-mode and source-window
+  correlation.
+- Visible success requires current-client completion plus correlated marker,
+  expected-content, non-empty-root and layout-box evidence.
+- A sandbox error boundary contains the deliberate render crash, emits
+  `RUNTIME_ERROR` and leaves the Next.js parent mounted and interactive.
+- Compiler recovery requires a fresh current-client `start`, successful `done`,
+  null Sandpack context error and correlated `SANDBOX_READY` before fixture
+  controls return.
+- Direct public navigation, hosted dependency reachability, runtime recovery and
+  compiler recovery were verified at
+  `https://statestorm.vercel.app/gate-0`.
+
+### Temporary accommodations
+
+- `reactStrictMode: false` remains limited to the Sandpack hackathon MVP path.
+- Compilation observability remains provisional because installed listener
+  messages have no StateStorm run-level correlation.
+- Strict serialization is mandatory; retained iframe DOM after a compilation
+  failure is stale and cannot be accepted as the current result.
+- Visible-output checks are deliberately coupled to the known Gate 0 component
+  and fixtures.
+
+### Unresolved post-hackathon hardening
+
+- malicious-code security analysis and enforcement
+- CPU, memory, infinite-loop, storage and network-abuse containment
+- a stable correlated compiler-error contract
+- hosted-service availability and version-control strategy
+- general component inputs, dependencies and framework support
+- restoration of React Strict Mode or replacement of the incompatible client
+  lifecycle
 
 ## Verified Sandpack setup
 
@@ -70,10 +114,11 @@ The failure had three concrete causes:
    dependency and the observer rebound to the current client instance, the
    current client consistently reached `done` and accepted repeated updates.
 
-The supplied browser evidence also recorded a timed-out
-`POST https://col.csbops.io/data/sandpack`. That external failure is a verified
-network risk, but it was not reproduced in the successful headless runs and is
-not claimed as the sole code root cause.
+Browser evidence recorded a timed-out
+`POST https://col.csbops.io/data/sandpack`. Public verification confirmed that
+this external telemetry failure is non-blocking: compilation, rendering and
+recovery still completed. It remains a network limitation, not a StateStorm run
+failure.
 
 ## Corrected initialization and run lifecycle
 
@@ -235,13 +280,20 @@ start/successful-done, null context error and fresh bootstrap evidence. The
 production parent target recorded no `Run failure`, console message, uncaught
 exception or loading failure.
 
-## Questions still open
+## Public deployment evidence
+
+Direct navigation to `https://statestorm.vercel.app/gate-0` completed the
+accepted Gate 0 path. The deployment visibly rendered both safe fixtures,
+contained the deliberate runtime crash, preserved and incremented the parent
+heartbeat, recovered without refreshing the parent, classified invalid TSX,
+reached `Compiler recovery verified` after restoring valid source and visibly
+rendered a final valid fixture. Hosted Sandpack dependencies were reachable.
+
+## Post-hackathon work still open
 
 - Compilation diagnostics remain limited to serialized execution because they
   lack message-level StateStorm correlation.
 - The development Strict Mode trade-off must be reopened before
   post-hackathon hardening or broader product expansion.
-- Public verification of the corrected F4 build and its network policy remains
-  pending.
 - Resource exhaustion, infinite-loop containment and malicious-code hardening
   remain unimplemented.

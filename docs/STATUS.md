@@ -2,14 +2,35 @@
 
 ## Current work
 
-- Gate: Gate 0 (open; not accepted)
-- Task: SS-M0-001-F4
-- State: F4 passed local development and built-production verification; public
-  redeployment verification remains pending
+- Gate: Gate 0 (passed; formally accepted)
+- Task: SS-M0-001-F5
+- State: Gate 0 sandbox feasibility baseline closed
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Prior decisions: SS-M0-001-F1 and SS-M0-001-F2 are accepted by the ChatGPT
-  Project architecture authority
+- Latest accepted milestone: Gate 0
+- Gate 1 implementation: Not begun
+
+## Formally accepted Gate 0 outcome
+
+The ChatGPT Project architecture authority formally accepted Gate 0 after
+public verification at:
+
+https://statestorm.vercel.app/gate-0
+
+The deployed application verified:
+
+- visibly distinct `safe-short` and `safe-long` renders
+- correlated runtime-crash classification through `RUNTIME_ERROR`
+- parent survival and heartbeat progression from 0 to 1 after the crash
+- heartbeat preservation at 1 through a valid recovery run
+- valid runtime recovery without a parent-page refresh
+- provisional invalid-TSX compilation classification
+- verified compiler restoration followed by a valid visible rerender
+- direct public `/gate-0` navigation and reachable hosted Sandpack dependencies
+
+The `col.csbops.io` timeout remains a verified non-blocking external telemetry
+limitation. Gate 0 acceptance establishes the hackathon MVP feasibility
+baseline; it is not malicious-code hardening or production certification.
 
 ## Verified F4 evidence
 
@@ -92,11 +113,8 @@ compilation-error correlation contract.
 | `npm run build` | Pass | Next.js 16.2.10 compiled, TypeScript passed, and `/`, `/_not-found` and `/gate-0` were statically prerendered |
 | `npm run start -- -p 3100` | Pass | Next.js production server became ready in 995 ms at `http://localhost:3100` |
 
-## Remaining Gate 0 evidence and risks
+## Accepted limitations and remaining risks
 
-- The corrected F4 build has not been deployed or verified at the public
-  `/gate-0` URL. The earlier deployed build exhibited the recovery failure that
-  F4 corrects.
 - Compilation observability is accepted provisionally only while execution is
   strictly serialized; it still lacks message-level StateStorm correlation.
 - Previous iframe DOM after invalid source is stale output and must never be
@@ -109,13 +127,12 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No local blocker remains for runtime crash containment, parent survival,
-serialized compilation recovery, compilation diagnostics or built local
-production-server execution. Gate 0 remains open because the corrected build
-still requires public deployment verification.
+No blocker remains for the accepted Gate 0 feasibility milestone. The known
+limitations remain binding on subsequent architecture work. No Gate 1
+implementation has begun.
 
 ## Next permitted action
 
-After separate authorization, deploy the corrected build and verify direct
-deployed `/gate-0` navigation plus the F4 recovery sequence. Do not begin
-another milestone or mark Gate 0 passed before that evidence is reviewed.
+Define the real StateStorm input contract and execution pipeline at the
+architecture level. Do not begin Gate 1 implementation without a separately
+authorized task packet.
