@@ -1,0 +1,197 @@
+# StateStorm Gate 0 architecture
+
+## Status
+
+Sandpack is the accepted **browser-isolated execution candidate** for the
+hackathon MVP. F1 and F2 are accepted. Local runtime containment, provisional
+compilation classification and built production-server execution are proven;
+Gate 0 remains open pending public deployment verification.
+
+## Current shell
+
+- Next.js 16.2.10 App Router, TypeScript, ESLint and Tailwind CSS 4
+- React and ReactDOM 19.2.4 in the StateStorm parent
+- npm with `package-lock.json`
+- `@codesandbox/sandpack-react` 2.20.0, which installs
+  `@codesandbox/sandpack-client` 2.19.8
+- `/gate-0` is statically prerendered, while Sandpack is loaded through a client
+  component and `next/dynamic` with `ssr: false`
+
+## Verified Sandpack setup
+
+The provider uses the installed `react-ts` template with no `customSetup`.
+`/UserComponent.tsx` is the active editor file. It is not the runtime entry.
+The template's `/package.json` declares `/index.tsx` as `main`; that explicit
+virtual file mounts `<App />` into the explicit `#root` in
+`/public/index.html` by using `createRoot`.
+
+The resolved virtual project contains:
+
+| File | Verified responsibility |
+| --- | --- |
+| `/UserComponent.tsx` | Typed sample component with the diagnostic card marker |
+| `/current-fixture.ts` | Safely serialized nonce, run ID, fixture ID, component mode and props |
+| `/runtime-bridge.tsx` | Error boundary, visible-DOM evidence and structured events |
+| `/App.tsx` | Marked diagnostic root and component/fixture composition |
+| `/index.tsx` | Actual React root entry and mount |
+| `/public/index.html` | Explicit `#root` host element |
+| `/styles.css` | Minimal visible preview styles |
+| `tsconfig.json` | Inherited from the installed `react-ts` template |
+| `/package.json` | Inherited template dependencies and `/index.tsx` main |
+
+Browser resource evidence showed matching sandbox React and ReactDOM 19.2.7
+packages. The two sandbox packages are compatible with each other. Their patch
+version is resolved by the hosted template and is independent of the parent's
+19.2.4 patch version.
+
+All generated imports use matching path casing. Browser inspection confirmed
+that the diagnostic root mounts, the CSS does not hide it, and the short card
+has a non-zero 607 by 183 pixel layout box in the validation viewport.
+
+## Verified F1 root cause
+
+The failure had three concrete causes:
+
+1. Fixture controls were enabled during Sandpack startup. In the installed
+   Sandpack React implementation, the immediate recompilation effect calls
+   `client.updateSandbox` only when `client.status === "done"`. An update made
+   earlier is skipped and is not replayed merely because the client later
+   becomes done. The parent nevertheless waited on the new run ID, so it timed
+   out while the iframe retained older content.
+2. `RenderCommitReporter` reported from a sibling effect after the wrapper
+   committed. It did not inspect the component root, marker, title, description
+   or layout box. Consequently, `RENDER_COMMITTED` meant "the bridge committed,"
+   not "the expected component is visibly present."
+3. During development validation, Strict Mode effect replay produced replaced
+   Sandpack clients: canceled iframe navigations were observed, and the iframe
+   contained the bootstrap DOM while the client returned by the current preview
+   ref remained `initializing`. With Strict Mode disabled for this provisional
+   dependency and the observer rebound to the current client instance, the
+   current client consistently reached `done` and accepted repeated updates.
+
+The supplied browser evidence also recorded a timed-out
+`POST https://col.csbops.io/data/sandpack`. That external failure is a verified
+network risk, but it was not reproduced in the successful headless runs and is
+not claimed as the sole code root cause.
+
+## Corrected initialization and run lifecycle
+
+Initialization requires both:
+
+1. The current preview client reaches `done`.
+2. A source-window-verified bootstrap event proves that the iframe root contains
+   the expected marker, title and description, non-empty text and a non-zero
+   layout box.
+
+Fixture buttons remain disabled until both signals arrive. Initialization that
+misses either signal becomes an explicit initialization failure after the named
+30-second provisional timeout.
+
+All compilation and fixture execution is strictly serialized. Controls stay
+disabled while the single active run is in flight. The MVP must not introduce a
+second concurrent compile or fixture request because Sandpack compilation
+messages have no StateStorm run-level correlation.
+
+Before every valid run, the parent rechecks that the current preview client is
+still `done`. It then creates a new run ID, writes only the serialized fixture
+file and enters `Compiling current run`. A run becomes `Component visibly
+rendered` only after both the current client's new `done` message/status and a
+strictly validated `RENDER_COMMITTED` event arrive for the same nonce, run ID,
+fixture ID and `componentMode: "valid"`.
+
+The runtime event includes diagnostic-only evidence:
+
+- root child count
+- rendered text length
+- diagnostic marker presence
+- expected title presence
+- expected description presence
+- non-zero visible layout box
+
+Missing evidence produces `RENDER_EVIDENCE_MISSING`, never success. Parent-side
+protocol validation and `MessageEvent.source` equality still reject stale,
+mismatched or unrelated messages.
+
+## Confirmed F1 findings
+
+- A fresh development load reaches explicit Sandpack readiness.
+- `safe-short`, `safe-long`, then `safe-short` again each use unique correlated
+  runs and visibly update the same iframe without a parent refresh.
+- Reloading the parent and rerunning `safe-short` also succeeds.
+- The explicit virtual entry mounts into the expected root.
+- The parent console showed only development informational/HMR messages, with no
+  uncaught parent exception or hydration error.
+- The production build succeeds and statically prerenders `/gate-0` without
+  executing submitted component code on the server.
+
+## Verified runtime crash and recovery flow
+
+The `runtime-crash` fixture throws `Deliberate Gate 0 runtime failure` during
+React rendering. The sandbox error boundary catches the value, converts it to
+bounded name/message/optional-stack strings, and emits `RUNTIME_ERROR` with the
+protocol source, version, nonce, run ID, fixture ID and component mode.
+
+The boundary key is `currentFixture.runId`, so the next serialized run resets the
+controlled fallback without remounting the parent page or Sandpack provider. A
+failed render cannot mount the sibling evidence reporter and therefore cannot
+emit `RENDER_COMMITTED`.
+
+The parent accepts the error only after protocol correlation and
+`MessageEvent.source` equality checks. It enters the distinct `Runtime error`
+state while parent-owned heartbeat state remains interactive. Development and
+built-server tests both recovered to `safe-short` and then visibly different
+`safe-long` content without a parent refresh.
+
+## Verified compilation diagnostic flow
+
+The invalid probe batches a new serialized run with
+`componentMode: "invalid-compilation-probe"` and syntactically invalid
+`/UserComponent.tsx`. The parent records the context error before replacement and
+all relevant installed listener messages for the active probe.
+
+Observed messages were `start`, status transitions,
+`done.compilatonError=true`, and `action/show-error`. The installed public
+context `error` changed from null to a populated `SandpackError` and cleared
+after valid source restoration. The invalid current source never started the
+current runtime bridge; the iframe retained the last valid DOM, whose run ID did
+not match the invalid parent run. The parent therefore reported neither visible
+success nor runtime error and instead displayed `Compilation diagnostic error`.
+
+Compilation failures are classified through the active
+`invalid-compilation-probe` mode, typed context error and installed listener
+signals. This classification is accepted provisionally for the serialized MVP.
+Listener messages contain no StateStorm nonce, run, fixture or mode correlation
+and are not a stable final correlation contract.
+
+When invalid source prevents the new runtime bridge from starting, the iframe
+may continue displaying DOM from the previous valid run. That DOM is explicitly
+stale output. Its run ID does not match the active invalid diagnostic, and it
+must never be accepted as the current result.
+
+## Verified timeout behavior
+
+Runtime and compilation outcomes stop the current run timer with their distinct
+states. A deliberately isolated iframe produced no outcome for a current valid
+run and reached the provisional 20,000 ms `Timed out` transition. During that
+run, a stale message from the actual iframe window was rejected for nonce
+mismatch and did not cancel the timer. Initialization retains its separate
+30,000 ms failure transition. No automatic retries were added.
+
+## Built production-server evidence
+
+`npm run build` compiled and statically prerendered `/gate-0`. The normal
+`npm run start -- -p 3100` command served the route at
+`http://localhost:3100/gate-0`. Edge 150 direct navigation reached readiness and
+completed safe, crash, heartbeat, safe recovery, long, invalid source, valid
+source restoration and final safe-render checks. The production parent target
+recorded no console messages, uncaught exceptions or loading failures.
+
+## Questions still open
+
+- Compilation diagnostics remain limited to serialized execution because they
+  lack message-level StateStorm correlation.
+- The development Strict Mode trade-off must be reopened before
+  post-hackathon hardening or broader product expansion.
+- Public deployment and its network policy remain unverified.
+- Resource exhaustion, infinite-loop containment and malicious-code hardening
+  remain unimplemented.
