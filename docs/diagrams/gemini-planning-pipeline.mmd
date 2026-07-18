@@ -1,0 +1,13 @@
+flowchart LR
+  browser[Browser submission] --> api[POST /api/preflight-plan]
+  api --> analyzer[Server-only deterministic AST analyzer]
+  analyzer --> deterministic[Deterministic boundary fixtures]
+  deterministic --> provider{Gemini available?}
+  provider -->|yes: metadata only| gemini[Gemini structured proposal]
+  provider -->|no or failure| fallback[Deterministic fallback]
+  gemini --> validation[Zod proposal validation]
+  validation --> materialize[Trusted requirement and fixture materialization]
+  materialize --> merge[Stable merge and cap]
+  fallback --> merge
+  merge --> runplan[RunPlanSchema v1]
+  runplan --> display[Planned, not executed]

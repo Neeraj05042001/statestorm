@@ -1,0 +1,13 @@
+flowchart TD
+  analysis[Validated ComponentContract] --> deterministic[Deterministic fixtures]
+  deterministic --> happy[det-happy-path]
+  deterministic --> boundaries[Remaining deterministic boundaries]
+  proposal[Validated Gemini proposal] --> requirements[Requirement materialization]
+  proposal --> semantic[Semantic fixture materialization]
+  happy --> merge[Canonical merge]
+  semantic --> merge
+  boundaries --> merge
+  merge --> cap[Deduplicate then cap at twelve]
+  requirements --> schema[RunPlanSchema v1]
+  cap --> schema
+  schema --> output[Planned, not executed]

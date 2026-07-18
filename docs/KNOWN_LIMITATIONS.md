@@ -69,9 +69,9 @@
 19. **Only ComponentContract metadata is source-derived.** SS-M1-002 derives the
     documented local component and prop subset. Requirement, fixture, issue and
     RunPlan assembly remain supplied data; they are not inferred or generated.
-20. **No AI generation exists.** Deterministic AST analysis is implemented, but
-    there is no AI interpretation, requirement extraction, fixture generator or
-    OpenAI integration.
+20. **AI planning is proposal-only.** Gemini may propose requirements and
+    semantic fixture assignments, but trusted StateStorm code can reject any
+    proposal or candidate. Gemini does not construct the final RunPlan.
 21. **Execution integration is deferred.** A validated executable RunPlan is a
     data classification only; no RunPlan-to-Sandpack adapter or versioned
     execution-result contract exists yet.
@@ -130,4 +130,37 @@
    required by the accepted contract but is not consumed by deterministic
    fixture planning.
 40. **Deterministic fixtures are not executed.** SS-M2-001 does not assemble a
-   complete RunPlan, connect fixtures to Sandpack or produce browser evidence.
+   complete RunPlan or produce browser evidence. SS-M2-002 assembles the plan,
+   but still does not connect it to Sandpack or execute any fixture.
+41. **Gemini availability is external.** Free-tier quotas, regional access,
+    model availability and provider latency may vary. Missing credentials,
+    quota exhaustion and provider failures use deterministic fallback.
+42. **Semantic output is nondeterministic.** Temperature is minimized and the
+    output shape is constrained, but identical requests are not guaranteed to
+    produce identical Gemini proposals. Trusted normalization and final schema
+    validation remain deterministic for any given proposal.
+43. **Provider-visible metadata.** The original prompt, validated component
+    contract and deterministic happy-path props are sent to Gemini. Submitted
+    component source, server metadata, environment values and stack traces are
+    not sent.
+44. **No provider runtime verification.** Gemini does not run the component and
+    cannot verify rendering, layout, interaction or browser behavior. Semantic
+    requirements and fixtures remain planned hypotheses.
+45. **One attempt and bounded deadline.** The Gemini adapter makes one request,
+    disables SDK retries and uses an approximately 12-second timeout. Transient
+    failures immediately select deterministic fallback.
+46. **Deterministic AI classifications are conservative.** The intermediate
+    proposal has no trusted assertion payload, so AI requirements classified as
+    deterministic are rejected instead of weakening `RequirementSchema`.
+47. **No rich collection synthesis.** Semantic assignments must still match the
+    flat `ComponentContract` kind. Nested collection shapes are not inferred or
+    type-checked beyond JSON and top-level array/object compatibility.
+48. **Preflight is not execution or persistence.** `/preflight` keeps input and
+    results in current browser/request memory, does not invoke Sandpack and does
+    not create a state atlas, execution result or saved history.
+49. **Schema validity is not semantic quality.** A proposal can be concise and
+    type-valid while still being weak, incomplete or unhelpful. Requirement
+    classification is AI-proposed, and unsupported requirements are displayed
+    as unsupported rather than verified.
+50. **No planning-service controls yet.** This milestone adds no rate limiting,
+    usage analytics, persistence, provider budget accounting or request queue.

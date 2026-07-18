@@ -1,0 +1,10 @@
+flowchart LR
+  service[Server-only planning service] --> adapter[Gemini adapter]
+  adapter --> request[Prompt + ComponentContract + happy-path props]
+  request --> gemini[gemini-2.5-flash-lite]
+  gemini --> structured[Structured JSON response]
+  structured --> zod[AiPlanningProposalSchema]
+  zod --> trusted[Trusted StateStorm materializers]
+  missing[Missing key, quota, timeout, refusal, invalid output, provider error] --> fallback[Deterministic fallback]
+  trusted --> plan[Validated RunPlan v1]
+  fallback --> plan

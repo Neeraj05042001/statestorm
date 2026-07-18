@@ -1,0 +1,17 @@
+export const RunPlanPlanningIssueCode = {
+  plannerUnavailable: "AI_PLANNER_UNAVAILABLE",
+  plannerTimeout: "AI_PLANNER_TIMEOUT",
+  plannerRefused: "AI_PLANNER_REFUSED",
+  plannerInvalidOutput: "AI_PLANNER_INVALID_OUTPUT",
+  plannerProviderError: "AI_PLANNER_PROVIDER_ERROR",
+  requirementRejected: "AI_REQUIREMENT_REJECTED",
+  requirementLimitApplied: "AI_REQUIREMENT_LIMIT_APPLIED",
+  fixtureInvalidJson: "AI_FIXTURE_INVALID_JSON",
+  fixtureUnknownProp: "AI_FIXTURE_UNKNOWN_PROP",
+  fixtureTypeMismatch: "AI_FIXTURE_TYPE_MISMATCH",
+  fixtureRequiredPropOmission: "AI_FIXTURE_REQUIRED_PROP_OMISSION",
+  fixtureSchemaValidationFailed: "AI_FIXTURE_SCHEMA_VALIDATION_FAILED",
+  fixtureDuplicate: "AI_FIXTURE_DUPLICATE",
+  fixtureLimitApplied: "AI_FIXTURE_LIMIT_APPLIED",
+  runPlanSchemaValidationFailed: "RUN_PLAN_SCHEMA_VALIDATION_FAILED",
+} as const;

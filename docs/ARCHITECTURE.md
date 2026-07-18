@@ -183,10 +183,61 @@ twelve unique fixtures are retained, and a stable warning reports any future
 truncation. Emitted fixtures are validated again after selection.
 
 This deterministic collection exists independently of future AI semantic
-fixtures. AI may later add prompt-specific values only through a separately
-authorized, runtime-validated planning step; deterministic fallback coverage
-does not depend on model availability. Arrays and objects use explicit defaults
-or empty containers until richer type-shape metadata exists.
+fixtures. SS-M2-002 adds prompt-specific values only through the separately
+authorized, runtime-validated planning step described below; deterministic
+fallback coverage does not depend on model availability. Arrays and objects use
+explicit defaults or empty containers until richer type-shape metadata exists.
+
+## Gate 2 Gemini-assisted RunPlan planning flow
+
+The SS-M2-002 planning request path is:
+
+`Browser submission -> POST /api/preflight-plan -> Node.js server-only planning service -> deterministic AST analysis -> deterministic fixtures -> optional Gemini proposal -> trusted materialization and merge -> validated RunPlan v1`
+
+The service always completes deterministic analysis and fixture generation
+before considering the optional semantic provider. Unsupported source fails
+closed before a provider can be called. The Gemini adapter is marked
+`server-only`, initializes `@google/genai` lazily, makes one request with SDK
+retry attempts fixed at one, and enforces an approximately 12-second deadline.
+`gemini-2.5-flash-lite` is the default model; `GEMINI_MODEL` is a bounded server
+configuration override.
+
+The provider boundary accepts only the original prompt, validated
+`ComponentContract` and cloned deterministic happy-path props. The adapter adds
+trusted planning instructions and asks for JSON matching the strict intermediate
+proposal shape. It does not accept or transmit submitted component source. It
+also does not transmit environment values, server metadata, errors or stack
+traces. Model output is untrusted until JSON parsing and
+`AiPlanningProposalSchema` validation both succeed.
+
+Trusted materializers then enforce the domain contracts:
+
+1. Requirements are normalized, deduplicated, ordered and capped at eight.
+   Heuristic and unsupported statements become schema-valid `Requirement`
+   values. A provider cannot create a deterministic assertion, so a proposed
+   deterministic classification without a trusted assertion is rejected with a
+   warning.
+2. Each semantic fixture begins from a deep clone of deterministic happy-path
+   props. JSON text assignments must target declared props and match the exact
+   prop kind or enum. Only optional props may be omitted. One invalid candidate
+   is dropped without blocking later valid candidates.
+3. Merge order is deterministic happy path, valid AI semantic fixtures, then
+   remaining deterministic boundaries. Canonical prop equality and unique IDs
+   remove duplicates before the twelve-fixture limit. Inputs are never mutated.
+4. The final data passes `RunPlanSchema`. Assembly failure produces
+   `RUN_PLAN_SCHEMA_VALIDATION_FAILED` and no partial RunPlan.
+
+The public provider statuses are `generated`, `unavailable`, `timeout`,
+`refused`, `invalid-output` and `provider-error`. Every non-generated outcome
+adds a bounded warning and proceeds with zero AI requirements, zero semantic
+fixtures and the deterministic fixture collection. Missing keys, quota
+exhaustion and provider errors therefore do not become HTTP 500. No retry or
+second provider is attempted.
+
+`/preflight` imports only client-safe schemas and types. It does not import the
+Gemini SDK, server planner, TypeScript Compiler API or source analyzer. The page
+is a diagnostic planner, not an execution surface: no fixture is sent to
+Sandpack and no provider result is described as verified runtime behavior.
 
 ## Verified Sandpack setup
 

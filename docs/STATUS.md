@@ -3,8 +3,8 @@
 ## Current work
 
 - Gate: Gate 2 (open)
-- Task: SS-M2-001 (active)
-- State: Deterministic fixture-planning implementation and local validation complete; architecture review pending
+- Task: SS-M2-002-PIVOT (active)
+- State: Gemini-assisted RunPlan planning implementation and local validation complete; architecture review pending
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
 - Latest accepted milestone: Gate 1 component-contract and server-analysis baseline
@@ -12,8 +12,39 @@
 - RunPlan version 1: Frozen and unchanged
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
 
-## Active SS-M2-001 evidence
+## Active SS-M2-002-PIVOT evidence
 
+- Gemini is the single MVP semantic-planning provider. The server-only adapter
+  uses `@google/genai` with `GEMINI_API_KEY`, an optional `GEMINI_MODEL` override
+  and the verified default `gemini-2.5-flash-lite`.
+- The adapter is lazy, performs one request with SDK retries disabled, applies
+  an approximately 12-second timeout, requests structured JSON and revalidates
+  the parsed response through the strict `AiPlanningProposalSchema`.
+- Gemini receives only the original prompt, serialized `ComponentContract`,
+  deterministic happy-path props and trusted planning instructions. Submitted
+  component source, environment values, server metadata and stack traces are
+  not included.
+- Trusted StateStorm code normalizes and validates AI requirements, rejects
+  deterministic claims without a supported assertion, materializes semantic
+  fixtures from cloned happy-path props, validates every assignment and
+  omission, then validates every emitted fixture through `FixtureSchema`.
+- Fixture merge order is happy path, valid semantic fixtures, then remaining
+  deterministic boundaries. Canonical props are deduplicated before the
+  accepted twelve-fixture cap, and the happy path is always retained.
+- Missing credentials, quota exhaustion, timeouts, refusals, malformed output
+  and provider failures produce stable warning codes and a schema-valid
+  deterministic-only RunPlan rather than HTTP 500.
+- `POST /api/preflight-plan` is a no-store Node.js boundary. `/preflight` is a
+  minimal planning diagnostic that shows contract, AI status, requirements,
+  fixtures and issues while stating that the plan was not executed.
+- Tests use injected fake providers only and make no Gemini network call. Gate 2
+  remains open; no RunPlan-to-Sandpack execution, detector, state atlas or
+  automatic fixing has begun.
+
+## Accepted SS-M2-001 evidence
+
+- SS-M2-001 is accepted and frozen at
+  `aea75aaf0984347314ed82446ddaff90f9b68223`.
 - `generateDeterministicFixtures` converts a validated `ComponentContract` into
   existing runtime-validated `Fixture` values and stable `ContractIssue` data.
 - A representative happy path and eleven ordered boundary strategies use fixed
@@ -28,9 +59,10 @@
 - Implementation evidence exists in focused baseline, strategy, invariant,
   JSON-safety, deduplication and limit tests. All required commands pass; Gate 2
   remains open pending architecture review.
-- No AI integration, prompt interpretation, requirement extraction, semantic
-  fixture generation, sandbox orchestration, state atlas, editing or UI was
-  added. The frozen Gate 0 and Gate 1 implementations are unchanged.
+- At SS-M2-001 acceptance, no AI integration, prompt interpretation,
+  requirement extraction, semantic fixture generation, sandbox orchestration,
+  state atlas, editing or UI had been added. The frozen Gate 0 and Gate 1
+  implementations remain unchanged by SS-M2-002.
 
 ## Formally accepted Gate 1 outcome
 
@@ -48,7 +80,7 @@ server stack traces, the analyzer remains behind its Node.js server-only
 boundary, and the frozen Gate 0 route remains operational.
 
 RunPlan version 1 and the deterministic source-analysis baseline are now frozen.
-No Gate 2 implementation has begun.
+At Gate 1 closure, no Gate 2 implementation had begun.
 
 ## Accepted SS-M1-003 evidence
 
@@ -239,9 +271,26 @@ compilation-error correlation contract.
 | --- | --- | --- |
 | `npm run lint` | Pass | ESLint completed with no errors or warnings |
 | `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
-| `npm run test` | Pass | Vitest 4.1.10 passed 135 tests across 10 files, preserving all 106 prior tests and adding 29 deterministic fixture-planning tests |
-| `npm run build` | Pass | Next.js 16.2.10 compiled, TypeScript passed, `/`, `/_not-found`, `/analyze` and `/gate-0` were statically prerendered, and `/api/component-analysis` was emitted as a dynamic route |
-| `npm run start -- -p 3100` | Pass | Final Next.js production server became ready in 2.9 seconds at `http://localhost:3100`; accepted, rejected and malformed API requests plus the full Edge UI sequence and `/gate-0` passed |
+| `npm run test` | Pass | Vitest 4.1.10 passed 188 tests across 15 files; provider tests use injected fakes and never call Gemini |
+| `npm run build` | Pass | Next.js 16.2.10 produced final build `Br7Mc-DhhcwYMfYJRbOvo`; `/preflight`, `/analyze` and `/gate-0` were emitted as static pages and both planning APIs were emitted as server routes |
+| `npm run start -- -p 3200` | Pass | Final Next.js production server became ready in 3.7 seconds; deterministic fallback plus direct `/preflight`, `/analyze` and `/gate-0` requests passed |
+
+## SS-M2-002 built-server and bundle evidence
+
+- The final optimized server became ready at `http://localhost:3200` in 3.7
+  seconds with `GEMINI_API_KEY` and `GEMINI_MODEL` absent.
+- `POST /api/preflight-plan` returned HTTP 200, `accepted: true`, AI status
+  `unavailable`, zero requirements, a non-empty deterministic fixture set,
+  `det-happy-path` first, `AI_PLANNER_UNAVAILABLE` and the no-store policy.
+- Final direct requests to `/preflight`, `/analyze` and `/gate-0` all returned
+  HTTP 200. The preflight HTML contained prompt, language, load-example and
+  no-execution guidance.
+- The four JavaScript chunks in the final `/preflight` client reference manifest
+  contained zero matches for the Gemini SDK, Gemini environment variables,
+  server planner, analyzer entry point or TypeScript Compiler API markers.
+- No live Gemini request was made. AI-generated behavior is validated with
+  injected deterministic fake providers; live free-tier verification is an
+  optional later environment check, not a requirement for this implementation.
 
 ## Accepted limitations and remaining risks
 
@@ -260,11 +309,13 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No blocker affects the SS-M2-001 implementation. Gate 2 remains open, and the
-frozen Gate 0, Gate 1 and RunPlan version 1 boundaries remain binding.
+No blocker affects the SS-M2-002 implementation. Gemini free-tier capacity is
+external and may vary, but deterministic fallback keeps planning available.
+Gate 2 remains open, and the frozen Gate 0, Gate 1 and RunPlan version 1
+boundaries remain binding.
 
 ## Next permitted action
 
-Architecture review of the deterministic fixture-planning evidence. Do not
-begin requirement extraction, AI semantic fixture generation, RunPlan assembly,
-sandbox orchestration or another task without separate authorization.
+Architecture review of the Gemini-assisted planning evidence. Do not begin
+RunPlan-to-Sandpack execution, public deployment, state-atlas work or another
+task without separate authorization.

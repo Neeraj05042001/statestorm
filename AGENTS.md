@@ -7,9 +7,9 @@
 - The frozen Gate 0 scope is an architecture spike that compiles and renders one
   hardcoded React/TypeScript component under controlled, JSON-serializable
   fixtures in Sandpack.
-- Do not add OpenAI integration, prompt analysis, requirement extraction,
-  semantic fixtures, production failure detectors, a state atlas, production UI
-  polish, or automatic fixing unless a later task packet explicitly authorizes it.
+- Do not add a second AI provider, production failure detectors, a state atlas,
+  production UI polish, or automatic fixing unless a later task packet
+  explicitly authorizes it.
 - Do not proceed past a gate until the ChatGPT Project has accepted that gate.
 - Avoid generalized abstractions and feature creep.
 

@@ -556,3 +556,82 @@
 - Validation method: Nested property-order deduplication, first-wins, limit and
   stable-warning tests.
 - Current status: Implemented for SS-M2-001.
+
+## D-034: Use Gemini as the single MVP semantic-planning provider
+
+- Recommendation: Use the native `@google/genai` SDK and default to the stable
+  `gemini-2.5-flash-lite` model, with `GEMINI_API_KEY` and an optional bounded
+  `GEMINI_MODEL` server override.
+- Reason: Official model documentation supports structured output for this
+  exact identifier, and current official pricing explicitly lists a free tier
+  suitable for the hackathon planning workload.
+- Alternatives considered: A separately billed provider, multiple provider
+  abstractions or a newer model whose free-tier availability was not explicit.
+- Trade-off: Free-tier quotas and model availability are external and may vary.
+- Risk: Provider output remains nondeterministic and may be unavailable.
+- Validation method: Official documentation review, dependency audit and fake-
+  provider tests; no live provider test is required or performed.
+- Current status: Implemented for SS-M2-002; Gate 2 remains open.
+
+## D-035: Keep Gemini behind a one-request server-only boundary
+
+- Recommendation: Initialize the SDK lazily in an `import "server-only"`
+  adapter, make one request, set retry attempts to one and apply an approximately
+  12-second timeout.
+- Reason: API keys and provider SDK types must not enter a client-transitive
+  graph, and implicit SDK retries would violate the bounded planning request.
+- Alternatives considered: Client-side calls, automatic retry or provider
+  orchestration frameworks.
+- Trade-off: Transient failures immediately use deterministic fallback.
+- Risk: An abort signal cannot revoke provider work already accepted remotely.
+- Validation method: Adapter configuration inspection, dependency-graph audit
+  and injected fake-provider tests.
+- Current status: Implemented for SS-M2-002.
+
+## D-036: Send metadata, never submitted source, to Gemini
+
+- Recommendation: Send only the original prompt, serialized validated contract,
+  deterministic happy-path props and trusted planning instructions.
+- Reason: Semantic planning needs product intent and safe prop metadata, not the
+  submitted implementation string.
+- Alternatives considered: Send full source, server metadata or prior errors.
+- Trade-off: Gemini cannot reason about implementation details absent from the
+  deterministic contract.
+- Risk: Prompt and contract data still leave the application boundary and must
+  be treated as provider-visible data.
+- Validation method: Exact provider input-key tests and client/server import
+  inspection.
+- Current status: Implemented as a binding data-minimization boundary.
+
+## D-037: Treat every Gemini proposal as untrusted planning input
+
+- Recommendation: Request structured JSON, parse it through the strict proposal
+  Zod schema, then materialize requirements and fixtures through existing domain
+  schemas and deterministic compatibility checks.
+- Reason: Provider schema conformance is not proof that values are safe,
+  supported or true.
+- Alternatives considered: Use provider objects directly or let the provider
+  construct a complete RunPlan.
+- Trade-off: Invalid candidates are dropped and deterministic assertions without
+  trusted assertion data are rejected.
+- Risk: Conservative validation can discard useful but unsupported suggestions.
+- Validation method: Malformed output, unknown prop, invalid JSON, type mismatch,
+  required omission, deduplication, limit and final RunPlan tests.
+- Current status: Implemented for SS-M2-002.
+
+## D-038: Preserve a deterministic-only RunPlan for every expected AI failure
+
+- Recommendation: Map missing credentials, quota exhaustion, timeout, refusal,
+  malformed output and provider failure to bounded public statuses and warnings,
+  then assemble the deterministic fixture plan without fabricated requirements.
+- Reason: Semantic enrichment is optional; planning must not depend on external
+  capacity and expected provider failure must not produce HTTP 500.
+- Alternatives considered: Fail the request, retry automatically or invent
+  prompt requirements locally.
+- Trade-off: A fallback plan can contain zero requirements and no semantic
+  fixtures.
+- Risk: Users may receive less meaningful coverage without noticing the status;
+  the UI therefore displays it explicitly.
+- Validation method: Fake-provider tests for all six statuses and RunPlan schema
+  validation of every fallback.
+- Current status: Implemented for SS-M2-002; it does not execute the RunPlan.

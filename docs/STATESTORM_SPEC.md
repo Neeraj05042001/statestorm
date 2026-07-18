@@ -36,22 +36,21 @@ The frozen workflow is:
 6. Collect deterministic browser evidence and correlate it to the active run.
 7. Present the resulting component states and evidence for review.
 
-Only the input and RunPlan contract validation in steps 1 and 4 is implemented
-in the Gate 1 domain layer. Gate 0 separately proves the feasibility of a
-hardcoded serialized Sandpack diagnostic. The remaining workflow steps are
-planned and are not implemented by the current baseline.
+Steps 1 through 4 now have a planning implementation: deterministic source
+analysis, deterministic boundary fixtures, optional Gemini proposals, trusted
+materialization and final RunPlan validation. Gate 0 separately proves the
+feasibility of a hardcoded serialized Sandpack diagnostic. General RunPlan
+execution and result presentation remain planned.
 
 ## AI responsibilities
 
-The planned AI boundary may interpret the user's prompt and supported
-source-derived metadata, normalize requirements, and propose JSON-compatible
-fixtures or contract issues. AI output must pass the deterministic RunPlan
-contract before it can become executable. AI does not execute submitted code,
-decide deterministic browser outcomes, bypass unsupported-component rules or
-modify component source automatically.
-
-No OpenAI integration, AI extraction, requirement extraction or AI fixture
-generation is implemented in the current baseline.
+Gemini is the single MVP AI boundary. It may interpret the user's prompt and
+supported source-derived contract metadata, and propose bounded requirements
+and JSON-compatible fixture assignments. Submitted component source is not sent
+to Gemini. AI output must pass the strict proposal schema and deterministic
+StateStorm materialization before it can enter a validated RunPlan. AI does not
+execute submitted code, decide deterministic browser outcomes, bypass
+unsupported-component rules or modify component source automatically.
 
 ## Deterministic browser responsibilities
 
@@ -112,7 +111,9 @@ The current frozen scope excludes:
 | Runtime-validated component, requirement, fixture, issue and RunPlan v1 schemas | Implemented and accepted |
 | JSON round-trip, cross-field validation and executability classification | Implemented and accepted |
 | Deterministic source-code analysis into `ComponentContract` | Implemented for the documented local AST subset; Gate 1 review pending |
-| AI prompt interpretation, requirement extraction and fixture generation | Planned; not implemented |
+| Gemini prompt interpretation and bounded proposal generation | Implemented behind a server-only, one-request boundary with deterministic fallback |
+| Trusted requirement and semantic-fixture materialization | Implemented; invalid proposals and candidates fail closed |
+| RunPlan v1 assembly and `/preflight` diagnostic | Implemented locally; planned data is not executed |
 | RunPlan-to-Sandpack execution integration | Planned; not implemented |
 | Deterministic production detectors and requirement evaluation | Planned; not implemented |
 | State atlas presentation | Planned; not implemented |
