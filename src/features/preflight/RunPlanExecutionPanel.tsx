@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -267,8 +266,6 @@ export function RunPlanExecutionPanel({
   });
   const [executor, setExecutor] = useState<FixtureSandboxExecutor | null>(null);
   const [guard] = useState(createLatestExecutionGuard);
-  const latestStateRef = useRef(state);
-  latestStateRef.current = state;
 
   useEffect(
     () => () => {
@@ -331,14 +328,15 @@ export function RunPlanExecutionPanel({
   }, [executor, guard, onExecutionActiveChange, runPlan]);
 
   const cancelExecution = useCallback(() => {
-    const current = latestStateRef.current;
-    const results = stateResults(current);
     guard.cancelCurrent();
-    setState({
-      status: "cancelled",
-      completedCount: results.length,
-      totalCount: runPlan.fixtures.length,
-      results,
+    setState((current) => {
+      const results = stateResults(current);
+      return {
+        status: "cancelled",
+        completedCount: results.length,
+        totalCount: runPlan.fixtures.length,
+        results,
+      };
     });
     onExecutionActiveChange?.(false);
   }, [guard, onExecutionActiveChange, runPlan.fixtures.length]);

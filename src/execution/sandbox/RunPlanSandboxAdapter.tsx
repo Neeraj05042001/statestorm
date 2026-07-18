@@ -323,7 +323,10 @@ export default function RunPlanSandboxAdapter({
     useState<ActiveExecution | null>(null);
   const activeRef = useRef<ActiveExecution | null>(null);
   const callbackRef = useRef(onExecutorChange);
-  callbackRef.current = onExecutorChange;
+
+  useEffect(() => {
+    callbackRef.current = onExecutorChange;
+  }, [onExecutorChange]);
 
   const finishActive = useCallback(
     (runId: string, result: FixtureExecutionResult) => {

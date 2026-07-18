@@ -1,7 +1,6 @@
 import {
   ContractIssueSchema,
   RunPlanSchema,
-  type ContractIssue,
 } from "../../domain";
 import { cloneJsonObject } from "../deterministic-fixtures/baseline-values";
 import { RunPlanPlanningIssueCode } from "./issue-codes";
