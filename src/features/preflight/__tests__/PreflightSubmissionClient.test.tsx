@@ -8,6 +8,7 @@ import type { AiPlannerProvider } from "../../../server/preflight-planning/provi
 import {
   atlasExampleCode,
   atlasExamplePrompt,
+  initialPreflightInputs,
   PreflightResultPanel,
   PreflightSubmissionClient,
 } from "../PreflightSubmissionClient";
@@ -59,7 +60,7 @@ function fakeProvider(): AiPlannerProvider {
   };
 }
 
-describe("/preflight diagnostic UI", () => {
+describe("/preflight product UI", () => {
   it("builds the reliable AtlasProductCard deterministic demo plan", async () => {
     const response = await planSubmission(
       {
@@ -92,16 +93,34 @@ describe("/preflight diagnostic UI", () => {
     ).toBeGreaterThan(100);
   });
 
-  it("renders the prompt, source, language, example and submit controls", () => {
+  it("renders the three-stage workflow, clear inputs, demo action, and primary submit control", () => {
     const html = renderToStaticMarkup(<PreflightSubmissionClient />);
 
-    expect(html).toContain("Product requirement prompt");
-    expect(html).toContain("React TypeScript component");
+    expect(html).toContain("Component");
+    expect(html).toContain("State plan");
+    expect(html).toContain("Execute and inspect");
+    expect(html).toContain("Original product requirement");
+    expect(html).toContain("React component source");
     expect(html).toContain("Source language");
-    expect(html).toContain("TSX");
-    expect(html).toContain("JSX");
-    expect(html).toContain("Load example");
-    expect(html).toContain("Create preflight plan");
+    expect(html).toContain("tsx");
+    expect(html).toContain("jsx");
+    expect(html).toContain("Load demo");
+    expect(html).toContain("Generate state plan");
+    expect(html).not.toContain("Gate 4 State Atlas diagnostic");
+  });
+
+  it("loads the accepted demo prompt and component through the demo input path", () => {
+    const inputs = initialPreflightInputs(true);
+    const html = renderToStaticMarkup(
+      <PreflightSubmissionClient initialDemo />,
+    );
+
+    expect(inputs.prompt).toBe(atlasExamplePrompt);
+    expect(inputs.componentCode).toBe(atlasExampleCode);
+    expect(inputs.language).toBe("tsx");
+    expect(html).toContain("Demo example loaded");
+    expect(html).toContain(atlasExamplePrompt);
+    expect(html).toContain("AtlasProductCard");
   });
 
   it("renders an AI-generated success with requirements and semantic fixtures", async () => {
@@ -112,16 +131,17 @@ describe("/preflight diagnostic UI", () => {
       <PreflightResultPanel state={{ status: "complete", response }} />,
     );
 
-    expect(html).toContain("AI-generated success");
+    expect(html).toContain("AI-enriched plan ready");
+    expect(html).toContain("Semantic AI planning added prompt-specific states");
     expect(html).toContain("Featured products should feel prominent.");
     expect(html).toContain("Urgent featured product");
-    expect(html).toContain("Run planned states");
-    expect(html).toContain(
-      "Planned requirements are not automatically verified by execution yet",
-    );
+    expect(html).toContain("Run preflight");
+    expect(html).toContain("AI-proposed");
+    expect(html).toContain(">1<");
+    expect(html).toContain("they are not pass/fail verdicts");
   });
 
-  it("renders deterministic fallback without claiming execution", async () => {
+  it("renders user-friendly deterministic fallback without claiming execution", async () => {
     const response = await planSubmission(supportedSubmission, {
       provider: null,
     });
@@ -129,9 +149,15 @@ describe("/preflight diagnostic UI", () => {
       <PreflightResultPanel state={{ status: "complete", response }} />,
     );
 
-    expect(html).toContain("Deterministic fallback");
+    expect(html).toContain("Boundary plan ready");
+    expect(html).toContain(
+      "Semantic AI planning was unavailable, so StateStorm preserved deterministic boundary coverage.",
+    );
     expect(html).toContain("AI_PLANNER_UNAVAILABLE");
-    expect(html).toContain("Gemini did not verify runtime behavior");
+    expect(html).toContain(">0<");
+    expect(html).toContain(
+      "Runtime and visual conclusions come only from recorded browser evidence",
+    );
   });
 
   it("renders the unsupported component state", async () => {
@@ -186,9 +212,9 @@ describe("/preflight diagnostic UI", () => {
       />,
     );
 
-    expect(validationHtml).toContain("Request validation");
+    expect(validationHtml).toContain("Input needs attention");
     expect(validationHtml).toContain("Prompt is required");
-    expect(serverHtml).toContain("sanitized unexpected failure");
+    expect(serverHtml).toContain("could not complete planning");
     expect(serverHtml).toContain("INTERNAL_PREFLIGHT_ERROR");
   });
 
@@ -291,12 +317,18 @@ describe("/preflight diagnostic UI", () => {
     );
 
     expect(html).toContain("Completed with failures");
-    expect(html).toContain("1 passed, 1 failed");
+    expect(html).toContain("1 rendered");
+    expect(html).toContain("1 execution failures");
     expect(html).toContain("title was empty");
     expect(html.indexOf(firstFixture.id)).toBeLessThan(
       html.indexOf(secondFixture.id),
     );
-    expect(html).toContain("Run again");
+    expect(html).toContain("Run preflight again");
+    expect(html).toContain("State Atlas");
+    expect(html).toContain("Raw execution evidence");
+    expect(html.indexOf("State Atlas")).toBeLessThan(
+      html.indexOf("Raw execution evidence"),
+    );
     expect(html).not.toContain("Requirement passed");
     expect(html).not.toContain("Requirement failed");
   });

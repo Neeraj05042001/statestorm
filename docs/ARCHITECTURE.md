@@ -21,6 +21,39 @@ selected-state live inspection accepted as MVP capabilities. Recorded execution
 remains authoritative. No requirement-verdict, screenshot, visual-baseline,
 responsive-matrix or editing architecture is authorized.
 
+SS-M5-001 is the authorized product-consolidation layer on top of that frozen
+baseline. It changes public copy, information hierarchy, responsive layout and
+presentation state only. It adds no domain capability, provider, detector,
+fixture strategy, execution path, sandbox lifecycle or persistence boundary.
+
+## Judge-facing public flow
+
+The product entry path is now:
+
+`/ -> /preflight -> POST /api/preflight-plan -> validated RunPlan -> serialized Sandpack execution -> State Atlas`
+
+The homepage remains a Server Component and presents the implemented product
+scope, four-step workflow and supported contract without importing the planner,
+analyzer, Gemini adapter, execution adapter or Sandpack. **Launch StateStorm**
+opens a blank `/preflight` input. **Load demo** opens `/preflight?demo=1`; the
+page reads that request value and passes only a boolean into the existing client
+form so the accepted `AtlasProductCard` prompt and source become initial browser
+state. No component source is evaluated while rendering the page.
+
+`/preflight` retains its existing client-safe schema imports and server API
+boundary. The UI exposes three presentation stages—Component, State plan, and
+Execute and inspect—without hiding or reordering the underlying workflow. Plan
+fixtures remain inspectable in a collapsed disclosure. During execution the
+existing single active adapter remains visible with serialized progress and
+cancellation. After completion the validated State Atlas becomes the primary
+full-width result, while raw execution evidence moves to a collapsed
+disclosure.
+
+The developer conclusion is a pure formatter over the validated State Atlas
+summary. It does not call AI, read submitted source, reinterpret execution
+status or create requirement verdicts. The selected-state inspection continues
+to mount at most one client-only Sandpack after serialized execution finishes.
+
 ## Current shell
 
 - Next.js 16.2.10 App Router, TypeScript, ESLint and Tailwind CSS 4

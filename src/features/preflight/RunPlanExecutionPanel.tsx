@@ -56,6 +56,8 @@ export type ExecutionPanelState =
     }
   | { status: "infrastructure-failure"; sanitizedMessage: string };
 
+export type ExecutionWorkflowPhase = "ready" | "running" | "finished";
+
 function statusBadgeClass(status: FixtureExecutionResult["status"]): string {
   if (status === "passed") return "bg-emerald-100 text-emerald-900";
   if (status === "cancelled") return "bg-slate-200 text-slate-800";
@@ -130,67 +132,116 @@ export function RunPlanExecutionView({
     state.status === "completed"
       ? state.totalCount
       : runPlan.fixtures.length;
+  const progressPercent =
+    totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+  const resultLabel = (fixtureId: string) =>
+    runPlan.fixtures.find((fixture) => fixture.id === fixtureId)?.label ??
+    "Recorded state";
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 bg-slate-950 p-5 text-white sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">
+              Execute and inspect
+            </p>
+            <h3 className="mt-2 text-xl font-semibold tracking-tight">
+              Run states in the isolated browser sandbox
+            </h3>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+              StateStorm executes exactly one planned state at a time. Each sandbox
+              lifecycle is removed before the next begins.
+            </p>
+          </div>
+          <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-slate-100">
+            {panelLabel(state)}
+          </span>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={onStart}
+            disabled={running || !adapterReady}
+            className="rounded-lg bg-sky-400 px-5 py-2.5 text-sm font-semibold text-slate-950 outline-none transition-colors hover:bg-sky-300 focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:bg-slate-700 disabled:text-slate-400"
+          >
+            {state.status === "completed" || state.status === "cancelled"
+              ? "Run preflight again"
+              : "Run preflight"}
+          </button>
+          {running ? (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-lg border border-white/25 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white outline-none transition-colors hover:border-rose-300 hover:text-rose-200 focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+            >
+              Cancel execution
+            </button>
+          ) : null}
+          {!adapterReady ? (
+            <span className="text-sm text-slate-400" role="status">
+              Preparing the isolated runner…
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="font-semibold">RunPlan execution</h3>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="text-sm font-semibold text-slate-950">Execution progress</p>
+          <p className="mt-1 text-sm text-slate-600" aria-live="polite">
             {completedCount} of {totalCount} completed
           </p>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
-          {panelLabel(state)}
-        </span>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={onStart}
-          disabled={running || !adapterReady}
-          className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:bg-slate-300"
-        >
-          {state.status === "completed" || state.status === "cancelled"
-            ? "Run again"
-            : "Run planned states"}
-        </button>
-        {running ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800"
-          >
-            Cancel execution
-          </button>
+        {state.status === "fixture-running" ? (
+          <p className="text-sm text-slate-700">
+            Current state: <strong>{state.fixture.label}</strong>
+          </p>
         ) : null}
       </div>
 
-      {state.status === "fixture-running" ? (
-        <p className="mt-4 text-sm text-slate-700">
-          Current fixture: <strong>{state.fixture.label}</strong> (
-          <code>{state.fixture.id}</code>)
-        </p>
-      ) : null}
+      <div
+        className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200"
+        role="progressbar"
+        aria-label="State execution progress"
+        aria-valuemin={0}
+        aria-valuemax={totalCount}
+        aria-valuenow={completedCount}
+      >
+        <div
+          className="h-full rounded-full bg-sky-600 transition-[width]"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
       {state.status === "completed" ? (
-        <p className="mt-4 text-sm font-medium text-slate-800">
-          {passedCount} passed, {failureCount} failed
-        </p>
+        <div className="mt-4 flex flex-wrap gap-2 text-sm font-semibold">
+          <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-900">
+            {passedCount} rendered
+          </span>
+          <span className="rounded-full bg-rose-100 px-3 py-1 text-rose-900">
+            {failureCount} execution failures
+          </span>
+        </div>
       ) : null}
       {state.status === "infrastructure-failure" ? (
-        <p className="mt-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-950">
+        <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-950">
           {state.sanitizedMessage}
         </p>
       ) : null}
 
       <div className={state.status === "completed" ? "hidden" : "mt-5"}>
-        <h4 className="text-sm font-semibold">Active fixture preview</h4>
-        <div className="mt-2">{preview}</div>
+        <h4 className="text-sm font-semibold text-slate-950">Active isolated preview</h4>
+        <p className="mt-1 text-xs leading-5 text-slate-500">
+          This preview belongs only to the current serialized state and is removed on completion or cancellation.
+        </p>
+        <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">{preview}</div>
       </div>
 
       {state.status === "completed" ? (
-        <div className="mt-6">
+        <div className="mt-8 border-t border-slate-200 pt-8">
           <StateAtlas
             key={state.session.sessionId}
             atlas={state.atlas}
@@ -200,16 +251,16 @@ export function RunPlanExecutionView({
       ) : null}
 
       {results.length > 0 && state.status !== "completed" ? (
-        <ol className="mt-5 space-y-2">
+        <ol className="mt-5 grid gap-2 sm:grid-cols-2">
           {results.map((result) => (
             <li
               key={result.fixtureId}
-              className="rounded-lg border border-slate-200 p-3"
+              className="rounded-xl border border-slate-200 p-3"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <code className="text-xs text-slate-700">
-                  {result.fixtureId}
-                </code>
+                <span className="text-sm font-semibold text-slate-800">
+                  {resultLabel(result.fixtureId)}
+                </span>
                 <span
                   className={`rounded-full px-2 py-1 text-xs font-semibold ${statusBadgeClass(result.status)}`}
                 >
@@ -229,8 +280,8 @@ export function RunPlanExecutionView({
 
       {state.status === "completed" ? (
         <details className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <summary className="cursor-pointer text-sm font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-sky-600">
-            Detailed execution evidence
+          <summary className="cursor-pointer rounded text-sm font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2">
+            Raw execution evidence ({results.length} states)
           </summary>
           <ol className="mt-4 space-y-2">
             {results.map((result) => (
@@ -266,8 +317,9 @@ export function RunPlanExecutionView({
       ) : null}
 
       <p className="mt-5 rounded-lg bg-sky-50 p-3 text-sm font-medium text-sky-950">
-        Planned requirements are not automatically verified by execution yet.
+        Execution findings describe observed runtime and visual behavior. They do not verify prompt requirements.
       </p>
+      </div>
     </section>
   );
 }
@@ -313,9 +365,11 @@ function progressToState(progress: ExecutionProgress): ExecutionPanelState {
 export function RunPlanExecutionPanel({
   runPlan,
   onExecutionActiveChange,
+  onExecutionPhaseChange,
 }: {
   runPlan: RunPlan;
   onExecutionActiveChange?: (active: boolean) => void;
+  onExecutionPhaseChange?: (phase: ExecutionWorkflowPhase) => void;
 }) {
   const [state, setState] = useState<ExecutionPanelState>({
     status: "plan-ready",
@@ -342,6 +396,7 @@ export function RunPlanExecutionPanel({
     if (!executor) return;
     const lease = guard.begin();
     onExecutionActiveChange?.(true);
+    onExecutionPhaseChange?.("running");
 
     void executeRunPlan({
       runPlan,
@@ -373,6 +428,7 @@ export function RunPlanExecutionPanel({
           });
         }
         onExecutionActiveChange?.(false);
+        onExecutionPhaseChange?.("finished");
       })
       .catch((error: unknown) => {
         if (!lease.isCurrent()) return;
@@ -381,8 +437,15 @@ export function RunPlanExecutionPanel({
           sanitizedMessage: sanitizeExecutionMessage(error),
         });
         onExecutionActiveChange?.(false);
+        onExecutionPhaseChange?.("finished");
       });
-  }, [executor, guard, onExecutionActiveChange, runPlan]);
+  }, [
+    executor,
+    guard,
+    onExecutionActiveChange,
+    onExecutionPhaseChange,
+    runPlan,
+  ]);
 
   const cancelExecution = useCallback(() => {
     guard.cancelCurrent();
@@ -396,7 +459,13 @@ export function RunPlanExecutionPanel({
       };
     });
     onExecutionActiveChange?.(false);
-  }, [guard, onExecutionActiveChange, runPlan.fixtures.length]);
+    onExecutionPhaseChange?.("finished");
+  }, [
+    guard,
+    onExecutionActiveChange,
+    onExecutionPhaseChange,
+    runPlan.fixtures.length,
+  ]);
 
   return (
     <RunPlanExecutionView

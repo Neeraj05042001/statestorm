@@ -2,18 +2,137 @@
 
 ## Current work
 
-- Gate: Gate 4 (passed, closed and frozen; Gate 0 through Gate 3 remain frozen)
-- Task: SS-M4-001 (accepted and closed)
-- State: Architecture authority accepted implementation commit `0d2f6e124ee7c3f74532d3c1dc63a0922310e84c` after local production-build and public Vercel browser verification passed
+- Gate: Gate 5 product-experience candidate (Gate 0 through Gate 4 remain passed, closed and frozen)
+- Task: SS-M5-001 (implementation and local verification complete; architecture decision pending)
+- State: Judge-facing homepage, three-stage preflight, stable demo entry, consolidated state-plan presentation and primary State Atlas experience are implemented and validated locally at an unstaged working-tree candidate
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: Gate 4 Interactive State Atlas and essential visual detectors
+- Latest accepted milestone: Gate 4 Interactive State Atlas and essential visual detectors at accepted HEAD `594599457d451b44466575a54861cf16e5b6052d`
 - Gate 0 execution architecture: Frozen and reused through narrow protocol primitives
 - RunPlan version 1: Frozen and unchanged
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
 - Gate 2 baseline: Frozen deterministic fixtures, Gemini proposal boundary, trusted materialization and stable RunPlan assembly
 - Gate 3 baseline: Frozen serialized fixture execution through the client-only Sandpack boundary, validated execution results and stale-session ownership rejection
 - Gate 4 baseline: Frozen validated State Atlas, essential overflow and broken-image detectors, judge-facing filters/cards and one selected-state inspection rerender only
+
+## SS-M5-001 implementation candidate
+
+The authorized product-consolidation candidate adds:
+
+- a judge-facing homepage using **AI builds the happy path. StateStorm reveals
+  what it forgot.**, implemented capability and supported-scope sections, and
+  clear **Launch StateStorm** and **Load demo** paths;
+- a blank normal `/preflight` launch plus `/preflight?demo=1` and in-form
+  **Load demo** actions that populate the accepted `AtlasProductCard` input;
+- a visible Component -> State plan -> Execute and inspect progress model;
+- clear prompt/source labels, a TSX/JSX selector, supported-scope guidance,
+  actionable unsupported-input presentation and a user-facing deterministic
+  fallback message;
+- a compact plan summary with AI/deterministic counts, grouped review criteria,
+  collapsed fixture details and technical planning diagnostics;
+- accurate serialized execution progress without session/run/nonce values in
+  the main UI;
+- a primary completed State Atlas with deterministic evidence conclusions,
+  distinct metrics, human-readable cards, filters, one selected inspection and
+  collapsed raw execution evidence; and
+- a structured README plus updated product demo, architecture, decision and
+  limitation documentation.
+
+This candidate adds no provider, dependency, fixture strategy, detector,
+execution classification, schema field, sandbox instance, screenshot,
+requirement verdict, persistence or automatic fix. The accepted cancellation,
+freshness, stale-message, correlation and source-window checks remain in place.
+
+Focused automated tests cover homepage positioning and scope, the demo query
+and populated input, removal of outdated public diagnostic headings, the
+three-stage workflow, AI/deterministic plan counts, fallback copy, execution
+progress, no-issue and mixed deterministic conclusions, Atlas priority, raw
+evidence, overlays, every filter and inspection selection.
+
+## SS-M5-001 validation evidence
+
+| Command | Result | Important output |
+| --- | --- | --- |
+| `npm run lint` | Pass | ESLint completed with zero errors and zero warnings |
+| `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
+| `npm run test` | Pass | Vitest 4.1.10 passed 271 tests across 27 files; the accepted 264 remain passing and seven focused tests were added |
+| `npm run build` | Pass | Next.js 16.2.10 compiled, type-checked and emitted static `/`, `/analyze`, `/gate-0`, dynamic `/preflight` and both server APIs |
+| `git diff --check` | Pass | No whitespace errors; only the repository's existing LF-to-CRLF checkout warnings were printed |
+
+Final production HTTP checks at `http://localhost:3100` returned 200 for `/`,
+`/preflight`, `/preflight?demo=1`, `/analyze` and `/gate-0`.
+`/preflight?demo=1` contained the trusted `AtlasProductCard` input and normal
+`/preflight` did not. `POST /api/component-analysis` returned an accepted
+supported contract. Production failure checks returned
+`UNSUPPORTED_PROP_TYPE` for a callback prop, `SOURCE_SYNTAX_ERROR` for malformed
+TSX and HTTP 400 `INVALID_COMPONENT_SUBMISSION` for a missing prompt.
+
+### SS-M5-001 production browser evidence
+
+Chrome 150.0.7871.116 loaded the optimized application in an extension-free
+headless profile. Visual inspection passed at 1440 × 900 for the homepage and
+loaded demo input, and at the browser's supported 500 × 844 mobile layout
+viewport for both pages. The requested 390px Windows headless captures were
+discarded because Chrome imposed a 500px layout minimum and cropped the image;
+they are not counted as responsive evidence. Verification images live outside
+the repository in the Codex visualization workspace.
+
+The real `AtlasProductCard` demo used deterministic fallback and produced an
+eleven-state plan with eleven deterministic states, zero AI states and zero
+requirements. The fallback message matched the authorized user-facing wording.
+Two complete foregrounded production runs each finished in about 33 seconds and
+produced exactly:
+
+- 11 total states;
+- 6 clean states;
+- 2 contained runtime failures;
+- 1 blank render;
+- 1 overflow-warning state;
+- 2 broken-image states; and
+- 0 other failures.
+
+The deterministic developer conclusion matched those counts. Raw evidence was
+collapsed, no requirement verdict appeared and no session/run/nonce value
+appeared in the main UI. Clean selection mounted exactly one inspection iframe.
+Runtime and blank selection removed it and displayed the recorded-evidence
+overlay. Browser interaction exercised All, Clean, Runtime and Blank; focused
+tests prove the exact Issues, Overflow and Broken images sets as well as every
+filter's safe selection behavior. **Run preflight again** cleared the prior
+Atlas and completed with the same counts, zero stale main IDs and zero captured
+parent errors.
+
+Replacement cancellation also passed in production Chrome. A new plan replaced
+an active execution after one completed state. Fifteen seconds later the
+replacement remained at zero results with no Atlas, cancellation UI, iframe,
+stale update or parent exception.
+
+The frozen `/gate-0` production sequence passed readiness, safe-short render,
+contained runtime crash, parent heartbeat increment to one, runtime recovery,
+invalid-TSX classification, compiler recovery and final safe-long render. It
+retained one iframe and recorded zero parent exceptions. The `/analyze` route
+returned 200 and its production API accepted a supported component.
+
+One earlier foregrounded demo run recorded an isolated happy-path timeout and
+one other-failure count; the next full run and both final end-to-end runs passed
+the happy path with Other failures at zero. This matches the existing point-in-
+time hosted Sandpack limitation and is not recorded as a reproducible product
+regression.
+
+### SS-M5-001 optimized bundle and security audit
+
+The exact `/preflight` entry and two lazy Sandpack graphs contain zero matches
+for the Gemini SDK or environment key names, server planning implementation,
+source analyzer, TypeScript compiler entry, `dangerouslySetInnerHTML`, parent
+`eval`, `new Function` or filesystem-write markers. The submitted-component and
+fixture-data virtual-file names occur only in the expected execution and
+inspection lazy chunks. One `console.log` string remains in the shared Sandpack
+vendor parser behind its own debug flag; application source contains zero log,
+debug, executable-HTML, parent-evaluation or filesystem-write matches.
+
+`package.json` and `package-lock.json` are unchanged. Browser evidence confirmed
+one active execution iframe, one selected-state inspection iframe only after
+execution, removal of that iframe for runtime/blank overlays, and no overlapping
+execution/inspection lifecycle. No security-boundary regression was observed.
 
 ## Accepted SS-M4-001 implementation evidence
 
@@ -503,12 +622,14 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No implementation, automated-validation, local production-browser or public
-Vercel blocker remains for SS-M4-001. Gemini free-tier capacity and hosted
-Sandpack availability remain external. Gate 4 is passed, closed and frozen,
-and the Gate 0 through Gate 3 and RunPlan version 1 boundaries remain binding.
+No implementation, automated-validation, optimized-build, bundle-audit or local
+production-browser blocker remains for SS-M5-001. Gemini capacity and hosted
+Sandpack availability remain external. Gate 0 through Gate 4 and RunPlan version
+1 remain frozen and binding. Architecture acceptance is intentionally pending.
 
 ## Next permitted action
 
-The next authorized milestone is final product polish, demo and submission.
-That work is not part of SS-M4-001 and has not begun in this closure task.
+Complete SS-M5-001 validation and local product-demo evidence, then return the
+candidate to the ChatGPT Project architecture authority for the Gate 5
+decision. Do not stage, commit, push, deploy or begin submission packaging in
+this task.

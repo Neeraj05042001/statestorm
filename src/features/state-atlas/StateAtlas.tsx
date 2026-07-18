@@ -82,50 +82,58 @@ export function StateAtlasView({
   );
 
   return (
-    <section aria-labelledby="state-atlas-heading" className="space-y-5">
+    <section aria-labelledby="state-atlas-heading" className="space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-sky-700">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
           Recorded browser evidence
         </p>
-        <h2
+        <h4
           id="state-atlas-heading"
           className="mt-1 text-2xl font-semibold tracking-tight text-slate-950"
         >
-          Interactive State Atlas
-        </h2>
+          State Atlas
+        </h4>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Compare completed fixture states, isolate visual warnings, and inspect
-          one recorded prop set at a time.
+          Compare completed states, isolate runtime and visual findings, and
+          inspect one recorded prop set at a time. Recorded execution remains authoritative.
         </p>
       </div>
 
       <StateAtlasSummary summary={atlas.summary} />
       <StateAtlasFilters selected={filter} onChange={onFilterChange} />
 
-      {visibleEntries.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {visibleEntries.map((entry) => (
-            <StateAtlasCard
-              key={entry.fixtureId}
-              entry={entry}
-              selected={entry.fixtureId === selectedId}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-600">
-          No recorded states match this filter.
-        </p>
-      )}
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.75fr)]">
+        {visibleEntries.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {visibleEntries.map((entry) => (
+              <StateAtlasCard
+                key={entry.fixtureId}
+                entry={entry}
+                selected={entry.fixtureId === selectedId}
+                onSelect={onSelect}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-600">
+            No recorded states match this filter.
+          </p>
+        )}
 
-      {selectedEntry ? (
-        <StateInspectionPreview
-          entry={selectedEntry}
-          runPlan={runPlan}
-          sessionId={atlas.sessionId}
-        />
-      ) : null}
+        <div className="xl:sticky xl:top-5">
+          {selectedEntry ? (
+            <StateInspectionPreview
+              entry={selectedEntry}
+              runPlan={runPlan}
+              sessionId={atlas.sessionId}
+            />
+          ) : (
+            <div className="grid min-h-80 place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-600">
+              Select a filter with recorded states to inspect a result.
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

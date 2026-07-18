@@ -1,5 +1,10 @@
 # Known limitations
 
+The judge-facing product experience does not expand the accepted execution or
+component contract. Product-language simplification can move issue codes and raw
+results behind disclosures, but it does not remove any technical limitation
+below.
+
 1. **Hosted execution dependency.** Gate 0 requires
    `2-19-8-sandpack.codesandbox.io` and CodeSandbox-hosted package metadata. It
    is not offline-capable.
@@ -220,3 +225,16 @@
     zero. Public Vercel verification also passed the happy path with Other
     failures at zero. The isolated local timeout remains point-in-time evidence,
     not a confirmed StateStorm defect.
+70. **Product polish is not accessibility certification.** SS-M5-001 adds
+    associated labels, keyboard-operable controls, visible focus treatment,
+    text labels alongside status colors and logical presentation hierarchy.
+    Automated and manual checks do not constitute complete WCAG or assistive-
+    technology certification.
+71. **The developer conclusion is intentionally bounded.** It summarizes
+    validated Atlas counts for runtime, blank, overflow, broken-image and other
+    failures. It does not interpret implementation intent, evaluate prompt
+    requirements or explain a root cause beyond recorded evidence.
+72. **The demo query selects trusted built-in input only.** `/preflight?demo=1`
+    preloads the accepted prompt and component but still uses the real planning
+    and execution pipeline. It does not persist input, bypass provider fallback,
+    hardcode fixture results or guarantee hosted Sandpack availability.

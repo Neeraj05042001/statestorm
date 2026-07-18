@@ -1,7 +1,119 @@
-# Gate 0 technical verification path
+# StateStorm product demo and technical verification path
 
-This is the engineering verification sequence for the provisional Sandpack
-architecture spike. It is not the final three-minute product demo.
+## Judge-facing product demo
+
+Use a 1440 × 900 viewport for the primary recording path. The demo uses the
+real planner, deterministic fallback, serialized Sandpack executor, detectors
+and State Atlas. It never hardcodes execution results.
+
+### Preparation
+
+Run development with `npm run dev`. For the final local evidence, build and
+serve the optimized application:
+
+```text
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run start -- -p 3100
+```
+
+Use an extension-free browser. Open `http://localhost:3100` for the optimized
+path. Gemini is optional: an unavailable provider must preserve deterministic
+boundary coverage.
+
+### First-time experience
+
+1. Open `/` and confirm the hero explains the product without Gate or repository
+   context.
+2. Confirm the page states **AI builds the happy path. StateStorm reveals what
+   it forgot.**
+3. Confirm the four workflow steps, eight implemented capabilities and narrow
+   supported component contract are visible.
+4. Select **Launch StateStorm** and confirm `/preflight` opens with empty input,
+   the three-stage progress model and supported-scope guidance.
+
+### Stable one-click demo
+
+1. Return to `/` and select **Load demo**, or select **Load demo** on
+   `/preflight`.
+2. Confirm the form is visibly marked **Demo example loaded** and contains the
+   accepted `AtlasProductCard` prompt and TSX source below.
+3. Select **Generate state plan**.
+4. Confirm either:
+   - semantic AI planning adds validated prompt-specific states; or
+   - the UI says **Semantic AI planning was unavailable, so StateStorm
+     preserved deterministic boundary coverage.**
+5. Confirm the plan summary shows total, deterministic and AI-proposed state
+   counts, grouped review criteria, a collapsed fixture disclosure and
+   accessible planning diagnostics.
+6. Select **Run preflight**. Confirm the current state label, completed/total
+   count, progress bar, one active isolated preview, serial-execution
+   explanation and cancellation action.
+7. Wait for completion. Confirm the State Atlas is the primary result and raw
+   execution evidence remains collapsed below it.
+8. Confirm at least one clean state, runtime failure, blank render, possible
+   overflow warning and confirmed broken-image finding.
+9. Confirm the deterministic developer conclusion matches the displayed
+   evidence counts and makes no prompt-requirement verdict.
+10. Exercise All, Issues, Clean, Runtime, Blank, Overflow and Broken images.
+11. Select a clean state and confirm exactly one preview labeled **Live
+    inspection — rerendered from recorded fixture props**.
+12. Select runtime and blank states and confirm their recorded-evidence overlays
+    remain intact.
+13. Select **Run preflight again** and confirm the prior Atlas unmounts, the new
+    serial session completes and no stale findings reappear.
+
+### Stable demo input
+
+Use this prompt:
+
+```text
+Render a product card with a title, price, image, featured treatment and calm
+or urgent tone. Exercise empty, zero-price, long-title and invalid-image states.
+```
+
+Use the exact `AtlasProductCard` source in the Gate 4 section below. Its happy
+path uses an embedded data-image URL. Empty title throws, zero price returns
+`null`, long title can overflow its constrained heading, and the deterministic
+invalid-image value does not depend on a public healthy image.
+
+### Failure experience
+
+Verify each without changing the accepted validation contract:
+
+1. Submit a callback prop such as `onAddToCart?: () => void` and confirm the UI
+   explains that executable callback props are unsupported.
+2. Submit malformed TSX and confirm a bounded source-syntax explanation with no
+   raw TypeScript object or stack.
+3. Submit an empty prompt and confirm an actionable input message.
+4. Run without Gemini capacity and confirm deterministic boundary coverage
+   remains executable.
+
+### Product regressions
+
+1. Navigate directly to `/analyze` and repeat its supported and unsupported
+   source checks.
+2. Navigate directly to `/gate-0` and repeat safe render, contained runtime
+   crash, recovery, invalid source and compiler recovery.
+3. Start a preflight rerun, then generate a replacement plan. Confirm the old
+   preview, result and detector messages cannot update the replacement UI.
+4. Confirm no main product surface exposes session IDs, run IDs or nonce values.
+5. Confirm focus is visible, filters are keyboard operable, labels remain
+   associated, and status includes text rather than color alone.
+
+### Evidence to record
+
+Record browser/version, exact URL, 1440 × 900 viewport, state totals, selected
+state, active iframe count, parent exceptions, relevant hosted Sandpack network
+failures, fallback/AI status and rerun freshness. Distinguish new SS-M5-001
+evidence from the accepted historical evidence below.
+
+## Technical regression paths
+
+The remaining sections preserve the accepted engineering verification sequence
+for the provisional Sandpack architecture and frozen execution milestones.
 
 ## Preparation
 

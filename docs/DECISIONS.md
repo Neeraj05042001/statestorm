@@ -808,3 +808,71 @@
 - Current status: Accepted by the ChatGPT Project architecture authority. Gate
   4 is passed, closed and frozen. The next authorized milestone is final product
   polish, demo and submission.
+
+## D-055: Use one product homepage with two explicit preflight entry paths
+
+- Recommendation: Make `/` the judge-facing product explanation, use
+  **Launch StateStorm** for a blank `/preflight`, and use **Load demo** for
+  `/preflight?demo=1` with the accepted `AtlasProductCard` input preloaded.
+- Reason: A first-time judge needs both a clear product story and a reliable
+  path to the already verified demonstration without repository knowledge.
+- Trade-off: Reading the demo query makes `/preflight` request-rendered instead
+  of an identical static shell for every query.
+- Preserved boundary: The query selects trusted hardcoded strings only. It does
+  not execute component source, alter planning, hardcode results or bypass the
+  client/server boundary.
+- Current status: Implemented by SS-M5-001; architecture review remains pending.
+
+## D-056: Present the workflow as three visible stages without adding a wizard
+
+- Recommendation: Show Component, State plan, and Execute and inspect as one
+  persistent progress model while retaining the complete input, plan and
+  execution context on the page.
+- Reason: The stages make the current position obvious without hiding context
+  that is important for a technical judge.
+- Trade-off: The page remains vertically longer than a step-by-step wizard.
+- Preserved boundary: Planning, cancellation, replacement ownership, fixture
+  order and execution callbacks are unchanged. The stage indicator is derived
+  only from existing UI state.
+- Current status: Implemented by SS-M5-001; architecture review remains pending.
+
+## D-057: Make the State Atlas primary and raw evidence secondary
+
+- Recommendation: After completion, lead with a deterministic developer
+  conclusion, distinct summary metrics, filters, state cards and one sticky
+  selected-state inspection. Keep ordered raw execution evidence in a collapsed
+  disclosure.
+- Reason: The Atlas communicates the failure pattern faster while preserving
+  access to every recorded result.
+- Trade-off: Internal fixture identifiers are no longer visible in the main
+  execution surface and require opening raw evidence.
+- Preserved boundary: `buildStateAtlas` remains the validated model authority;
+  recorded results and detector findings are unchanged, and the inspection
+  rerender cannot overwrite them.
+- Current status: Implemented by SS-M5-001; architecture review remains pending.
+
+## D-058: Generate the product conclusion deterministically from Atlas counts
+
+- Recommendation: Format issue-state totals and runtime, blank, overflow,
+  broken-image and other-failure clauses directly from `StateAtlasSummary`.
+- Reason: The conclusion should be stable, testable and traceable to recorded
+  browser evidence rather than model prose.
+- Trade-off: The wording is intentionally bounded and does not interpret prompt
+  requirements.
+- Preserved boundary: No AI request, new schema field, detector, requirement
+  verdict or execution mutation is introduced.
+- Current status: Implemented and covered by no-issue and mixed-evidence tests;
+  architecture review remains pending.
+
+## D-059: Describe semantic fallback as preserved deterministic coverage
+
+- Recommendation: Lead with “Semantic AI planning was unavailable, so
+  StateStorm preserved deterministic boundary coverage,” and place stable issue
+  codes inside detailed planning diagnostics.
+- Reason: Expected provider unavailability should communicate graceful product
+  behavior rather than make the planning flow appear broken.
+- Trade-off: Users open technical details when they need the exact provider
+  failure code.
+- Preserved boundary: Provider status, warning codes, one-request behavior,
+  timeout and fallback assembly remain unchanged.
+- Current status: Implemented by SS-M5-001; architecture review remains pending.

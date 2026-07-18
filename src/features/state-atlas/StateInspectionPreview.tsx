@@ -20,24 +20,23 @@ export function StateInspectionPreview({
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wider text-sky-700">
-        Live inspection — rerendered from recorded fixture props
-      </p>
-      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-3">
-        <h3 className="text-xl font-semibold text-slate-950">
-          {entry.fixtureLabel}
-        </h3>
-        <span className="text-sm font-medium text-slate-500">
-          Recorded: {entry.executionResult.status}
-        </span>
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 bg-slate-950 p-5 text-white">
+        <p className="text-xs font-semibold uppercase tracking-wider text-sky-300">
+          Live inspection — rerendered from recorded fixture props
+        </p>
+        <div className="mt-2 flex flex-wrap items-baseline justify-between gap-3">
+          <h5 className="text-xl font-semibold">{entry.fixtureLabel}</h5>
+          <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-slate-200">
+            Recorded: {entry.executionResult.status}
+          </span>
+        </div>
+        <p className="mt-2 text-sm leading-6 text-slate-300">
+          Recorded findings are the source of truth. This isolated rerender cannot overwrite them.
+        </p>
       </div>
-      <p className="mt-2 text-sm text-slate-600">
-        Recorded execution findings remain the source of truth. This isolated
-        rerender cannot overwrite them.
-      </p>
 
-      <div className="mt-4">
+      <div className="p-4">
         {canRender ? (
           <StateInspectionSandboxClient
             key={`${sessionId}:${entry.fixtureId}`}

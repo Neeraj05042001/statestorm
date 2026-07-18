@@ -13,6 +13,7 @@ import {
   selectionForFilter,
   StateAtlasView,
 } from "../StateAtlas";
+import { stateAtlasConclusion } from "../StateAtlasSummary";
 import { buildStateAtlas } from "../build-state-atlas";
 
 const source = "export default function Card() { return <p>ok</p>; }";
@@ -160,7 +161,12 @@ describe("State Atlas UI", () => {
       />,
     );
 
-    expect(html).toContain("Interactive State Atlas");
+    expect(html).toContain("State Atlas");
+    expect(html).toContain("Developer conclusion");
+    expect(html).toContain("4 of 5 states showed issues");
+    expect(html).toContain(
+      "A state may contain more than one recorded finding.",
+    );
     expect(html).toContain("Total states");
     expect(html).toContain(">5<");
     expect(html).toContain("Clean");
@@ -168,10 +174,10 @@ describe("State Atlas UI", () => {
     expect(html).toContain("Broken images");
     expect(html).toContain("aria-pressed=\"true\"");
     expect(html).toContain("Happy product");
-    expect(html).toContain("deterministic fixture");
-    expect(html).toContain("ai fixture");
-    expect(html).toContain("layout-overflow");
-    expect(html).toContain("broken-image");
+    expect(html).toContain("Deterministic state");
+    expect(html).toContain("AI-planned state");
+    expect(html).toContain("Possible overflow");
+    expect(html).toContain("Broken image");
   });
 
   it("selects the first issue, otherwise the deterministic happy path", () => {
@@ -187,10 +193,38 @@ describe("State Atlas UI", () => {
   it("filters entries and resolves a filtered-out selection safely", () => {
     const { atlas } = atlasFixture();
     expect(
+      filterAtlasEntries(atlas.entries, "all").map((entry) => entry.fixtureId),
+    ).toEqual(["det-happy-path", "runtime", "blank", "overflow", "broken"]);
+    expect(
       filterAtlasEntries(atlas.entries, "issues").map(
         (entry) => entry.fixtureId,
       ),
     ).toEqual(["runtime", "blank", "overflow", "broken"]);
+    expect(
+      filterAtlasEntries(atlas.entries, "clean").map(
+        (entry) => entry.fixtureId,
+      ),
+    ).toEqual(["det-happy-path"]);
+    expect(
+      filterAtlasEntries(atlas.entries, "runtime").map(
+        (entry) => entry.fixtureId,
+      ),
+    ).toEqual(["runtime"]);
+    expect(
+      filterAtlasEntries(atlas.entries, "blank").map(
+        (entry) => entry.fixtureId,
+      ),
+    ).toEqual(["blank"]);
+    expect(
+      filterAtlasEntries(atlas.entries, "overflow").map(
+        (entry) => entry.fixtureId,
+      ),
+    ).toEqual(["overflow"]);
+    expect(
+      filterAtlasEntries(atlas.entries, "broken-images").map(
+        (entry) => entry.fixtureId,
+      ),
+    ).toEqual(["broken"]);
     expect(
       selectionForFilter({
         entries: atlas.entries,
@@ -225,10 +259,10 @@ describe("State Atlas UI", () => {
     );
 
     expect(runtimeHtml).toContain(
-      '<h3 class="text-xl font-semibold text-slate-950">Empty title runtime</h3>',
+      '<h5 class="text-xl font-semibold">Empty title runtime</h5>',
     );
     expect(blankHtml).toContain(
-      '<h3 class="text-xl font-semibold text-slate-950">Zero price blank</h3>',
+      '<h5 class="text-xl font-semibold">Zero price blank</h5>',
     );
     expect(runtimeHtml).toContain(
       "No visible recorded preview is available for this state.",
@@ -239,5 +273,41 @@ describe("State Atlas UI", () => {
     expect(JSON.stringify(atlas)).toBe(before);
     expect(blankHtml).not.toContain("Requirement passed");
     expect(blankHtml).not.toContain("Requirement failed");
+  });
+
+  it("creates a deterministic no-issue developer conclusion", () => {
+    expect(
+      stateAtlasConclusion({
+        totalStates: 4,
+        cleanStates: 4,
+        runtimeFailures: 0,
+        blankRenders: 0,
+        overflowWarnings: 0,
+        brokenImages: 0,
+        otherFailures: 0,
+      }),
+    ).toEqual({
+      headline: "No runtime or visual issues found",
+      detail:
+        "All 4 tested states completed without a recorded failure or detector finding.",
+    });
+  });
+
+  it("counts issue states and describes mixed recorded evidence without AI", () => {
+    expect(
+      stateAtlasConclusion({
+        totalStates: 12,
+        cleanStates: 8,
+        runtimeFailures: 1,
+        blankRenders: 1,
+        overflowWarnings: 2,
+        brokenImages: 1,
+        otherFailures: 0,
+      }),
+    ).toEqual({
+      headline: "4 of 12 states showed issues",
+      detail:
+        "The component crashed in one state, rendered blank in one state, showed possible overflow in 2 states, and contained broken images in one state.",
+    });
   });
 });
