@@ -6,8 +6,8 @@ import { AiPlanningProposalSchema } from "../../domain";
 import type { AiPlannerInput, AiPlannerProvider } from "./provider";
 import { AiPlannerFailure } from "./provider";
 
-// export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
-export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
+
 export const GEMINI_REQUEST_TIMEOUT_MS = 12_000;
 
 const trustedPlanningInstructions = [
