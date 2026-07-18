@@ -215,10 +215,8 @@
     or failed.
 68. **No atlas persistence or report export.** There is no database, session
     history, collaboration, downloadable report or shareable artifact.
-69. **Gate 4 public verification is pending.** Automated validation and local
-    production-build `AtlasProductCard` browser verification passed. The same
-    atlas, detector, inspection and rerun sequence has not yet been recorded on
-    the public Vercel deployment, so Gate 4 remains open.
-70. **One initial happy-path timeout was non-reproducible.** It cleared on rerun
-    and after a hard refresh, with happy path passed and Other failures at zero.
-    It remains point-in-time local evidence, not a confirmed StateStorm defect.
+69. **One initial local happy-path timeout was non-reproducible.** It cleared on
+    rerun and after a hard refresh, with happy path passed and Other failures at
+    zero. Public Vercel verification also passed the happy path with Other
+    failures at zero. The isolated local timeout remains point-in-time evidence,
+    not a confirmed StateStorm defect.

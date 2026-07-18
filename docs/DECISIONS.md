@@ -696,7 +696,8 @@
   messages in SS-M3-001.
 - Reason: Screenshot capture, atlas layout and advanced detectors require later
   architecture decisions.
-- Current status: Deferred; no screenshot or atlas dependency was added.
+- Current status: Historical Gate 3 decision. Gate 4 later accepted the State
+  Atlas without adding screenshot capture or a visual-baseline dependency.
 
 ## D-046: Accept and freeze the Gate 3 RunPlan execution baseline
 
@@ -724,7 +725,8 @@
   correlated Sandpack iframe and return bounded plain metadata.
 - Reason: Submitted DOM must not cross into or be queried by the parent page.
 - Trade-off: Detector logic is part of the generated virtual runtime bridge.
-- Current status: Implemented locally for SS-M4-001; Gate 4 review is pending.
+- Current status: Accepted and frozen with Gate 4 after local production-build
+  and public Vercel verification passed.
 
 ## D-048: Supplement rather than replace execution status
 
@@ -734,7 +736,7 @@
   confirmed broken image.
 - Trade-off: Atlas display categories and execution status are related but
   intentionally distinct.
-- Current status: Implemented locally for SS-M4-001.
+- Current status: Accepted and frozen with Gate 4.
 
 ## D-049: Use conservative overflow wording and bounds
 
@@ -743,7 +745,8 @@
 - Reason: Overflow is heuristic and cannot prove a prompt requirement failed.
 - Trade-off: Intentional clipping can be reported and late or transform-only
   overflow can be missed.
-- Current status: Implemented and documented as possible layout overflow.
+- Current status: Accepted and frozen with Gate 4 as possible layout overflow,
+  not a requirement verdict.
 
 ## D-050: Require completed image failure evidence
 
@@ -753,7 +756,7 @@
 - Reason: Pending images are not reliable failures, and complete URLs are not
   required evidence.
 - Trade-off: Slow images unresolved during the settle window are omitted.
-- Current status: Implemented locally for SS-M4-001.
+- Current status: Accepted and frozen with Gate 4.
 
 ## D-051: Do not create a sandbox for each atlas card
 
@@ -762,7 +765,8 @@
 - Reason: Parallel card iframes would violate serialized execution ownership
   and multiply hosted compiler lifecycles.
 - Trade-off: Only one state is live-inspectable at a time.
-- Current status: Implemented locally; one-sandbox browser evidence is pending.
+- Current status: Accepted and frozen with Gate 4 after public browser evidence
+  confirmed one live inspection sandbox and lifecycle replacement.
 
 ## D-052: Permit one selected fixture inspection rerender
 
@@ -772,8 +776,8 @@
 - Reason: A judge needs a visible selected state without inserting submitted DOM
   into the parent.
 - Trade-off: Inspection is a new render, not a screenshot of the recorded run.
-- Current status: Implemented locally for passed entries; failed and blank
-  entries use recorded-evidence overlays.
+- Current status: Accepted and frozen with Gate 4 for passed entries; failed
+  and blank entries use recorded-evidence overlays.
 
 ## D-053: Keep recorded execution authoritative and screenshots excluded
 
@@ -782,4 +786,25 @@
 - Reason: Rerender timing and external resource availability can differ from the
   recorded execution.
 - Trade-off: The visible inspection can diverge from point-in-time evidence.
-- Current status: Implemented locally; screenshot capture remains excluded.
+- Current status: Accepted and frozen with Gate 4; screenshot capture remains
+  excluded.
+
+## D-054: Accept and freeze the Gate 4 State Atlas baseline
+
+- Recommendation: Accept SS-M4-001 implementation commit
+  `0d2f6e124ee7c3f74532d3c1dc63a0922310e84c` as the frozen Gate 4 MVP baseline
+  for the Interactive State Atlas, essential overflow and broken-image
+  detection, and one selected-state live inspection sandbox.
+- Reason: Local production-build and public Vercel verification proved the
+  validated Atlas, preserved runtime and blank classifications, correct summary
+  counts and filters, predictable issue selection, bounded visual findings,
+  single-inspection lifecycle replacement, recorded-evidence overlays,
+  authoritative recorded findings and fresh complete reruns. Happy path passed,
+  Other failures remained zero, no full image URL was exposed and no hydration
+  warning occurred in the extension-free public browser.
+- Preserved boundary: Recorded execution remains authoritative. Screenshot
+  capture, visual baselines, responsive matrices and prompt-requirement verdicts
+  remain excluded; no requirement was falsely marked passed or failed.
+- Current status: Accepted by the ChatGPT Project architecture authority. Gate
+  4 is passed, closed and frozen. The next authorized milestone is final product
+  polish, demo and submission.

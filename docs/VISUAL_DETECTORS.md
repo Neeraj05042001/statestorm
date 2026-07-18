@@ -7,11 +7,15 @@ overflow and confirmed broken images. Detector logic runs inside the active
 fixture's Sandpack iframe. The parent never queries submitted DOM, fetches a
 submitted image URL or inserts submitted HTML.
 
+Local production-build and public Vercel browser verification passed. Overflow
+detection and broken-image detection are accepted MVP capabilities, and Gate 4
+is passed, closed and frozen.
+
 Findings supplement `FixtureExecutionResult`; they never replace or reinterpret
 `passed`, `runtime-error`, `blank-render`, `compile-error`, `timeout`,
 `infrastructure-error` or `cancelled`.
 
-## Recorded local production evidence
+## Accepted browser evidence
 
 Production-build browser verification observed conservative overflow warnings
 on constrained long-content states and confirmed broken-image findings without
@@ -19,10 +23,16 @@ complete URLs. Runtime-error and blank-render states retained their execution
 classifications, later states continued, and inspection rerenders did not
 change recorded findings.
 
-One initial happy-path timeout was non-reproducible. The happy path passed on
-rerun and after a hard refresh, with Other failures returning to zero. Public
-Vercel detector verification remains pending. The detector milestone adds
-neither screenshots nor prompt-requirement verdicts.
+One initial local happy-path timeout was non-reproducible. The happy path passed
+on rerun and after a hard refresh, with Other failures returning to zero.
+
+Public Vercel verification in an extension-free browser reproduced
+conservative overflow warnings and confirmed broken-image findings without
+exposing full image URLs. Runtime and blank classifications remained intact,
+happy path passed, Other failures remained zero, inspection did not overwrite
+recorded findings and no hydration warning occurred. No prompt requirement was
+falsely marked passed or failed. The detector milestone adds neither screenshots
+nor prompt-requirement verdicts.
 
 ## Collection sequence
 

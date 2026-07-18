@@ -115,7 +115,7 @@ The current frozen scope excludes:
 | Trusted requirement and semantic-fixture materialization | Implemented; invalid proposals and candidates fail closed |
 | RunPlan v1 assembly and `/preflight` diagnostic | Implemented and accepted; execution is connected separately by SS-M3-001 |
 | RunPlan-to-Sandpack execution integration | Implemented locally by SS-M3-001; Gate 3 review and manual browser evidence pending |
-| Essential overflow and broken-image detectors | Implemented locally for SS-M4-001; Gate 4 review and browser evidence pending |
+| Essential overflow and broken-image detectors | Implemented and accepted as frozen Gate 4 MVP capabilities after public Vercel verification |
 | Generalized production detectors and requirement evaluation | Explicitly excluded from SS-M4-001 |
-| State atlas presentation | Implemented locally for SS-M4-001; Gate 4 review and browser evidence pending |
+| State atlas presentation | Implemented and accepted with one selected-state live inspection as a frozen Gate 4 MVP capability |
 | Automatic component fixing | Explicitly excluded from the current scope |

@@ -3,15 +3,16 @@
 ## Status and scope
 
 SS-M4-001 adds the judge-facing State Atlas for a completed, validated
-`ExecutionSessionResult`. The architecture authority accepted the local
-implementation, and production-build browser verification passed. Gate 4
-remains open until public Vercel Atlas verification is recorded and accepted.
+`ExecutionSessionResult`. Local production-build and public Vercel browser
+verification passed, and the architecture authority accepted Gate 4. The State
+Atlas and one-state live inspection are accepted MVP capabilities; Gate 4 is
+passed, closed and frozen.
 
 The atlas is a recorded-evidence presentation layer. It does not change fixture
 execution status, verify prompt requirements, persist a session, capture a
 screenshot or edit and selectively rerun fixtures.
 
-## Recorded local production evidence
+## Accepted browser evidence
 
 The production-build `AtlasProductCard` sequence produced a validated atlas,
 preserved runtime and blank classifications, displayed overflow and confirmed
@@ -20,10 +21,21 @@ selected predictably. Selecting a clean state mounted one inspection sandbox;
 changing selection replaced its lifecycle; failed and blank states showed
 recorded-evidence overlays; and inspection never changed recorded results.
 
-A complete rerun reset and recreated the atlas. One initial happy-path timeout
-did not reproduce on rerun or after hard refresh: the happy path passed and
-Other failures returned to zero. Public Vercel verification remains pending.
-No screenshots or requirement verdicts were added.
+A complete local rerun reset and recreated the atlas. One initial happy-path
+timeout did not reproduce on rerun or after hard refresh: the happy path passed
+and Other failures returned to zero.
+
+Public Vercel verification in an extension-free browser reproduced the
+validated Atlas, correct runtime and blank classifications, correct summary
+counts and every filter. It confirmed predictable first-issue selection, one
+live inspection sandbox, replacement of its lifecycle on selection change,
+recorded-evidence overlays and fresh **Run again** session ownership. Happy path
+passed, Other failures remained zero, inspection did not overwrite recorded
+findings, no hydration warning occurred and no prompt requirement was falsely
+marked passed or failed.
+
+Recorded execution and detector findings remain authoritative. No screenshots
+or requirement verdicts were added.
 
 ## Model construction
 

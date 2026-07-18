@@ -2,22 +2,22 @@
 
 ## Current work
 
-- Gate: Gate 4 (open; Gate 0 through Gate 3 passed, closed and frozen)
-- Task: SS-M4-001 (active)
-- State: Architecture authority accepted the local implementation; production-build browser verification passed; public Vercel verification remains pending
+- Gate: Gate 4 (passed, closed and frozen; Gate 0 through Gate 3 remain frozen)
+- Task: SS-M4-001 (accepted and closed)
+- State: Architecture authority accepted implementation commit `0d2f6e124ee7c3f74532d3c1dc63a0922310e84c` after local production-build and public Vercel browser verification passed
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: Gate 3 serialized RunPlan sandbox-execution baseline
+- Latest accepted milestone: Gate 4 Interactive State Atlas and essential visual detectors
 - Gate 0 execution architecture: Frozen and reused through narrow protocol primitives
 - RunPlan version 1: Frozen and unchanged
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
 - Gate 2 baseline: Frozen deterministic fixtures, Gemini proposal boundary, trusted materialization and stable RunPlan assembly
 - Gate 3 baseline: Frozen serialized fixture execution through the client-only Sandpack boundary, validated execution results and stale-session ownership rejection
-- Gate 4 scope: Essential overflow and broken-image detectors, validated State Atlas, judge-facing filters/cards and one selected-state inspection rerender only
+- Gate 4 baseline: Frozen validated State Atlas, essential overflow and broken-image detectors, judge-facing filters/cards and one selected-state inspection rerender only
 
-## Active SS-M4-001 implementation evidence
+## Accepted SS-M4-001 implementation evidence
 
-Gate 4 is open. The local implementation now includes:
+Gate 4 passed, closed and froze the following MVP capabilities:
 
 - strict `DetectorFindingSchema`, bounded detector observations and fixture-
   matching refinements on execution results;
@@ -88,8 +88,20 @@ A hydration warning was traced to a browser extension injecting the
 mode with extensions disabled. It is not a StateStorm defect, and no
 `suppressHydrationWarning` or `layout.tsx` change was made.
 
-Public Vercel Atlas verification remains pending. Gate 4 stays open until that
-public evidence is recorded and accepted.
+Public Vercel verification repeated the accepted Atlas path in an extension-
+free browser. It confirmed correct summary counts and every Atlas filter,
+predictable first-issue selection, exactly one live clean-state inspection
+sandbox, replacement of the prior inspection lifecycle on selection change,
+recorded-evidence overlays for runtime and blank states, and authoritative
+recorded execution findings that inspection rerenders could not overwrite.
+**Run again** created a fresh execution session and Atlas; happy path passed and
+Other failures remained zero. Broken-image evidence exposed no full image URL,
+no hydration warning occurred, and no prompt requirement was falsely marked
+passed or failed.
+
+The architecture authority accepted that public evidence. Gate 4 is passed,
+closed and frozen at implementation commit
+`0d2f6e124ee7c3f74532d3c1dc63a0922310e84c`.
 
 Final product polish, submission work, screenshots, persistence, editing,
 responsive matrices and prompt-requirement verdicts remain outside SS-M4-001.
@@ -491,15 +503,12 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No implementation, automated-validation or local production-browser blocker
-affects SS-M4-001. Public Vercel Atlas verification remains pending. Gemini
-free-tier capacity and hosted Sandpack availability remain external. Gate 3 is
-passed, closed and frozen, and the Gate 0, Gate 1, Gate 2 and RunPlan version 1
-boundaries remain binding.
+No implementation, automated-validation, local production-browser or public
+Vercel blocker remains for SS-M4-001. Gemini free-tier capacity and hosted
+Sandpack availability remain external. Gate 4 is passed, closed and frozen,
+and the Gate 0 through Gate 3 and RunPlan version 1 boundaries remain binding.
 
 ## Next permitted action
 
-Verify the documented `AtlasProductCard` path on the public Vercel deployment,
-including detector findings, filters, selected inspection lifecycle, overlays
-and rerun freshness. Submit that public evidence to the ChatGPT Project
-architecture authority before marking Gate 4 passed. Do not begin final polish.
+The next authorized milestone is final product polish, demo and submission.
+That work is not part of SS-M4-001 and has not begun in this closure task.

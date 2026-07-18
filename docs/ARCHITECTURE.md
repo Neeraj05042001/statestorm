@@ -15,9 +15,11 @@ frozen as the Gate 1 baseline.
 Gate 2 is formally accepted and frozen after public Gemini and deterministic
 fallback verification. Public production AI planning used
 `GEMINI_MODEL=gemini-3.1-flash-lite`, which is also the active repository
-default. Gate 3 is passed, closed and frozen. Gate 4 is open for SS-M4-001's
-interactive State Atlas and the essential overflow and broken-image detectors.
-No requirement-verdict, screenshot or editing architecture is authorized.
+default. Gate 3 remains frozen. Gate 4 is passed, closed and frozen with the
+interactive State Atlas, essential overflow and broken-image detectors, and one
+selected-state live inspection accepted as MVP capabilities. Recorded execution
+remains authoritative. No requirement-verdict, screenshot, visual-baseline,
+responsive-matrix or editing architecture is authorized.
 
 ## Current shell
 

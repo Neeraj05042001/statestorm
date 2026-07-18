@@ -150,9 +150,9 @@ closed and frozen.
 
 ## Gate 4 State Atlas verification path
 
-This sequence is the required SS-M4-001 manual path. Local production-build
-browser verification passed. Public Vercel Atlas verification remains pending,
-so Gate 4 stays open.
+This sequence is the accepted SS-M4-001 manual path. Local production-build and
+public Vercel browser verification passed. The architecture authority accepted
+the evidence, so Gate 4 is passed, closed and frozen.
 
 Use this prompt:
 
@@ -238,7 +238,7 @@ Gemini planning when local provider capacity is available. Record exact browser
 version, URL, session and fixture IDs, state totals, selected state, iframe
 count, parent exceptions and relevant hosted Sandpack network failures.
 
-### Recorded local production result
+### Accepted local and public result
 
 The production-build browser sequence passed. Completed execution produced the
 validated atlas; runtime and blank results stayed correctly classified;
@@ -254,8 +254,21 @@ zero. A hydration warning was separately traced to a browser extension adding
 `cz-shortcut-listen` to `body`; incognito mode with extensions disabled removed
 the warning. No hydration suppression or layout change is warranted.
 
-No screenshots or prompt-requirement verdicts were added. Repeat the sequence
-on the public Vercel deployment before requesting Gate 4 closure.
+Public Vercel verification passed in an extension-free browser. The completed
+execution produced the validated Atlas with correct summary counts; every
+filter worked; the first issue was selected predictably; one clean-state live
+inspection sandbox mounted; selection changes replaced its lifecycle; runtime
+and blank overlays showed recorded evidence; and inspection rerenders did not
+overwrite recorded findings. **Run again** created a fresh execution session
+and Atlas. Happy path passed, Other failures remained zero, broken-image
+findings exposed no full image URL and no hydration warning occurred. No prompt
+requirement was falsely marked passed or failed.
+
+The architecture authority accepted this public evidence. State Atlas,
+overflow detection, broken-image detection and one-state live inspection are
+accepted MVP capabilities. Recorded execution remains authoritative. Screenshot
+capture, visual baselines, responsive matrices and requirement verdicts remain
+excluded. No screenshots or prompt-requirement verdicts were added.
 
 ### Regression and production build
 
