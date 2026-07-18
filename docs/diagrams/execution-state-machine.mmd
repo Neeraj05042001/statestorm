@@ -1,0 +1,18 @@
+stateDiagram-v2
+  [*] --> PlanReady
+  PlanReady --> ExecutionStarting: Run planned states
+  ExecutionStarting --> FixtureRunning: adapter ready
+  FixtureRunning --> PartiallyComplete: fixture result
+  PartiallyComplete --> FixtureRunning: next fixture
+  FixtureRunning --> CompletedAllPassing: final result / all passed
+  FixtureRunning --> CompletedWithFailures: final result / any failure
+  PartiallyComplete --> CompletedAllPassing: final result / all passed
+  PartiallyComplete --> CompletedWithFailures: final result / any failure
+  ExecutionStarting --> Cancelled: abort or replacement
+  FixtureRunning --> Cancelled: abort or replacement
+  PartiallyComplete --> Cancelled: abort or replacement
+  ExecutionStarting --> InfrastructureFailure: orchestration failure
+  FixtureRunning --> InfrastructureFailure: orchestration failure
+  CompletedAllPassing --> ExecutionStarting: Run again
+  CompletedWithFailures --> ExecutionStarting: Run again
+  Cancelled --> ExecutionStarting: Run again

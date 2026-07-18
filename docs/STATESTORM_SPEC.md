@@ -36,11 +36,11 @@ The frozen workflow is:
 6. Collect deterministic browser evidence and correlate it to the active run.
 7. Present the resulting component states and evidence for review.
 
-Steps 1 through 4 now have a planning implementation: deterministic source
-analysis, deterministic boundary fixtures, optional Gemini proposals, trusted
-materialization and final RunPlan validation. Gate 0 separately proves the
-feasibility of a hardcoded serialized Sandpack diagnostic. General RunPlan
-execution and result presentation remain planned.
+Steps 1 through 4 have the accepted planning implementation: deterministic
+source analysis, deterministic boundary fixtures, optional Gemini proposals,
+trusted materialization and final RunPlan validation. SS-M3-001 now connects
+that plan to serialized browser execution and bounded result presentation while
+reusing the accepted Gate 0 Sandpack boundary.
 
 ## AI responsibilities
 
@@ -61,10 +61,10 @@ rejecting stale preview output and reporting observable results. Submitted code
 must not execute in the StateStorm parent application or during server
 rendering.
 
-Gate 0 proves these responsibilities only for its hardcoded diagnostic fixtures
-and accepted Sandpack recovery sequence. A RunPlan-to-Sandpack adapter,
-generalized failure detectors and versioned execution results are not yet
-implemented.
+Gate 0 proves its hardcoded diagnostic fixtures and accepted Sandpack recovery
+sequence. SS-M3-001 adds the RunPlan-to-Sandpack adapter and strict companion
+execution-result schemas. Generalized production detectors and requirement
+evaluation remain unimplemented.
 
 ## Supported component scope
 
@@ -113,8 +113,8 @@ The current frozen scope excludes:
 | Deterministic source-code analysis into `ComponentContract` | Implemented for the documented local AST subset; Gate 1 review pending |
 | Gemini prompt interpretation and bounded proposal generation | Implemented behind a server-only, one-request boundary with deterministic fallback |
 | Trusted requirement and semantic-fixture materialization | Implemented; invalid proposals and candidates fail closed |
-| RunPlan v1 assembly and `/preflight` diagnostic | Implemented locally; planned data is not executed |
-| RunPlan-to-Sandpack execution integration | Planned; not implemented |
+| RunPlan v1 assembly and `/preflight` diagnostic | Implemented and accepted; execution is connected separately by SS-M3-001 |
+| RunPlan-to-Sandpack execution integration | Implemented locally by SS-M3-001; Gate 3 review and manual browser evidence pending |
 | Deterministic production detectors and requirement evaluation | Planned; not implemented |
 | State atlas presentation | Planned; not implemented |
 | Automatic component fixing | Explicitly excluded from the current scope |

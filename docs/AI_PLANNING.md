@@ -12,11 +12,16 @@ behavior or construct the final RunPlan.
 - Package: `@google/genai`
 - Required key for semantic generation: `GEMINI_API_KEY`
 - Optional model override: `GEMINI_MODEL`
-- Default model: `gemini-2.5-flash-lite`
+- Default model: `gemini-3.1-flash-lite`
 - Request limit: one SDK request with `retryOptions.attempts` set to `1`
 - Deadline: approximately 12 seconds
 - Response: `application/json` constrained by a Gemini JSON Schema and then
   parsed through `AiPlanningProposalSchema`
+
+Public production AI planning was successfully verified with
+`GEMINI_MODEL=gemini-3.1-flash-lite`. That exact model is also the repository
+default. The bounded `GEMINI_MODEL` server override remains available; there is
+no model fallback, automatic model selection or second provider.
 
 The SDK client is initialized lazily in an `import "server-only"` adapter. The
 key is never returned, logged, placed in an issue or included in provider input.

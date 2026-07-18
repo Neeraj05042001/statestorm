@@ -9,6 +9,7 @@ import {
   PreflightResultPanel,
   PreflightSubmissionClient,
 } from "../PreflightSubmissionClient";
+import { RunPlanExecutionView } from "../RunPlanExecutionPanel";
 
 const supportedSubmission = {
   id: "preflight-ui-test",
@@ -79,7 +80,10 @@ describe("/preflight diagnostic UI", () => {
     expect(html).toContain("AI-generated success");
     expect(html).toContain("Featured products should feel prominent.");
     expect(html).toContain("Urgent featured product");
-    expect(html).toContain("Planned, not executed");
+    expect(html).toContain("Run planned states");
+    expect(html).toContain(
+      "Planned requirements are not automatically verified by execution yet",
+    );
   });
 
   it("renders deterministic fallback without claiming execution", async () => {
@@ -151,5 +155,108 @@ describe("/preflight diagnostic UI", () => {
     expect(validationHtml).toContain("Prompt is required");
     expect(serverHtml).toContain("sanitized unexpected failure");
     expect(serverHtml).toContain("INTERNAL_PREFLIGHT_ERROR");
+  });
+
+  it("renders execution progress, disables conflicting starts, and previews the active fixture", async () => {
+    const response = await planSubmission(supportedSubmission, {
+      provider: null,
+    });
+    if (!response.accepted) throw new Error("Expected an accepted test plan");
+    const fixture = response.runPlan.fixtures[0];
+    const html = renderToStaticMarkup(
+      <RunPlanExecutionView
+        runPlan={response.runPlan}
+        state={{
+          status: "fixture-running",
+          sessionId: "session-ui",
+          fixture,
+          completedCount: 1,
+          totalCount: response.runPlan.fixtures.length,
+          results: [
+            {
+              fixtureId: fixture.id,
+              status: "passed",
+              summary: "Visible output rendered.",
+              evidence: {
+                sandboxCompleted: true,
+                renderCommitted: true,
+                expectedDomFound: true,
+                meaningfulDomFound: true,
+              },
+            },
+          ],
+        }}
+        adapterReady
+        onStart={() => undefined}
+        onCancel={() => undefined}
+        preview={<p>Isolated active preview</p>}
+      />,
+    );
+
+    expect(html).toContain("Partially complete");
+    expect(html).toContain(`1 of ${response.runPlan.fixtures.length} completed`);
+    expect(html).toContain(fixture.label);
+    expect(html).toContain("Isolated active preview");
+    expect(html).toContain("disabled");
+  });
+
+  it("renders ordered sanitized failures, totals, rerun, and no requirement verdicts", async () => {
+    const response = await planSubmission(supportedSubmission, {
+      provider: null,
+    });
+    if (!response.accepted) throw new Error("Expected an accepted test plan");
+    const [firstFixture, secondFixture] = response.runPlan.fixtures;
+    const html = renderToStaticMarkup(
+      <RunPlanExecutionView
+        runPlan={response.runPlan}
+        state={{
+          status: "completed",
+          totalCount: 2,
+          session: {
+            sessionId: "session-complete",
+            status: "completed",
+            results: [
+              {
+                fixtureId: firstFixture.id,
+                status: "passed",
+                summary: "Visible output rendered.",
+                evidence: {
+                  sandboxCompleted: true,
+                  renderCommitted: true,
+                  expectedDomFound: true,
+                  meaningfulDomFound: true,
+                },
+              },
+              {
+                fixtureId: secondFixture.id,
+                status: "runtime-error",
+                summary: "The component threw while rendering.",
+                sanitizedMessage: "title was empty",
+                evidence: {
+                  sandboxCompleted: true,
+                  renderCommitted: false,
+                  expectedDomFound: false,
+                  meaningfulDomFound: false,
+                },
+              },
+            ],
+          },
+        }}
+        adapterReady
+        onStart={() => undefined}
+        onCancel={() => undefined}
+        preview={null}
+      />,
+    );
+
+    expect(html).toContain("Completed with failures");
+    expect(html).toContain("1 passed, 1 failed");
+    expect(html).toContain("title was empty");
+    expect(html.indexOf(firstFixture.id)).toBeLessThan(
+      html.indexOf(secondFixture.id),
+    );
+    expect(html).toContain("Run again");
+    expect(html).not.toContain("Requirement passed");
+    expect(html).not.toContain("Requirement failed");
   });
 });

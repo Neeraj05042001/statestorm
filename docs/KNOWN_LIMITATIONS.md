@@ -72,9 +72,10 @@
 20. **AI planning is proposal-only.** Gemini may propose requirements and
     semantic fixture assignments, but trusted StateStorm code can reject any
     proposal or candidate. Gemini does not construct the final RunPlan.
-21. **Execution integration is deferred.** A validated executable RunPlan is a
-    data classification only; no RunPlan-to-Sandpack adapter or versioned
-    execution-result contract exists yet.
+21. **Execution is browser-only and provisional.** A validated executable
+    RunPlan can now run through the client-only Sandpack adapter, but the iframe
+    remains a browser-isolated candidate rather than a hardened hostile-code
+    sandbox.
 22. **Dependency audit findings remain open.** `npm audit` reports two moderate
     dependency findings. They are non-blocking for the accepted RunPlan version
     1 baseline, and no forced dependency upgrade was performed. They require a
@@ -129,9 +130,10 @@
 39. **Prompt interpretation remains absent.** `ComponentSubmission.prompt` is
    required by the accepted contract but is not consumed by deterministic
    fixture planning.
-40. **Deterministic fixtures are not executed.** SS-M2-001 does not assemble a
-   complete RunPlan or produce browser evidence. SS-M2-002 assembles the plan,
-   but still does not connect it to Sandpack or execute any fixture.
+40. **Execution evidence is intentionally narrow.** SS-M3-001 executes the
+   assembled deterministic and semantic fixtures, but records only compilation,
+   runtime, blank, timeout, infrastructure, cancellation and minimal visible-DOM
+   outcomes.
 41. **Gemini availability is external.** Free-tier quotas, regional access,
     model availability and provider latency may vary. Missing credentials,
     quota exhaustion and provider failures use deterministic fallback.
@@ -155,12 +157,37 @@
 47. **No rich collection synthesis.** Semantic assignments must still match the
     flat `ComponentContract` kind. Nested collection shapes are not inferred or
     type-checked beyond JSON and top-level array/object compatibility.
-48. **Preflight is not execution or persistence.** `/preflight` keeps input and
-    results in current browser/request memory, does not invoke Sandpack and does
-    not create a state atlas, execution result or saved history.
+48. **Preflight execution is not persisted.** `/preflight` keeps input, plan and
+    execution results in current browser memory. Reloading loses them, and no
+    state atlas or saved history is created.
 49. **Schema validity is not semantic quality.** A proposal can be concise and
     type-valid while still being weak, incomplete or unhelpful. Requirement
     classification is AI-proposed, and unsupported requirements are displayed
     as unsupported rather than verified.
 50. **No planning-service controls yet.** This milestone adds no rate limiting,
     usage analytics, persistence, provider budget accounting or request queue.
+51. **Serialized execution is slower.** Fixtures intentionally compile and run
+    one at a time so the active Sandpack lifecycle owns every accepted result.
+52. **Compilation correlation remains provisional.** A fresh single-fixture
+    lifecycle narrows attribution, but Sandpack diagnostics still lack
+    StateStorm session, run, fixture and nonce fields.
+53. **No screenshots.** Execution keeps only bounded structured evidence and
+    the live active preview; it does not capture or retain iframe images.
+54. **No overflow or broken-image detection.** Meaningful DOM is a minimal
+    visible-output signal, not a production layout or resource detector.
+55. **No requirement verification.** Execution results never claim a planned
+    requirement passed or failed.
+56. **No responsive viewport matrix.** Every fixture uses the current preview
+    size only.
+57. **No selective fixture rerun.** The user can rerun the complete ordered plan
+    but cannot rerun one result independently.
+58. **Ten-second fixture timeout is lifecycle containment only.** It removes the
+    active adapter view before continuing, but it does not provide hardened CPU,
+    memory or hostile infinite-loop containment.
+59. **No execution persistence.** Cancellation, navigation and reload discard
+    partial or complete execution sessions.
+60. **Final Gate 3 verification is incomplete.** Local fragile-component
+    execution, serial continuation and rerun freshness passed, but public Vercel
+    execution remains pending. Replacement cancellation also lacks explicit
+    manual evidence; completed-session rerun freshness is not a substitute for
+    cancelling an in-flight run with a replacement plan.

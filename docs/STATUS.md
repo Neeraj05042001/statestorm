@@ -2,21 +2,109 @@
 
 ## Current work
 
-- Gate: Gate 2 (open)
-- Task: SS-M2-002-PIVOT (active)
-- State: Gemini-assisted RunPlan planning implementation and local validation complete; architecture review pending
+- Gate: Gate 3 (open)
+- Task: SS-M3-001 (active)
+- State: Local fragile-component browser verification passed; public Vercel execution and replacement-cancellation verification pending
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: Gate 1 component-contract and server-analysis baseline
-- Gate 0 execution architecture: Frozen and unchanged
+- Latest accepted milestone: Gate 2 Gemini-assisted and deterministic fallback planning baseline
+- Gate 0 execution architecture: Frozen and reused through narrow protocol primitives
 - RunPlan version 1: Frozen and unchanged
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
+- Gate 2 baseline: Frozen deterministic fixtures, Gemini proposal boundary, trusted materialization and stable RunPlan assembly
 
-## Active SS-M2-002-PIVOT evidence
+## Active SS-M3-001 evidence
+
+- The accepted RunPlan retains the submitted component source and language, so
+  execution requires no server-side submitted-module import or evaluation.
+- `executeRunPlan` is independent of React and Sandpack. It revalidates RunPlan
+  v1, preserves order, executes one injected fixture executor at a time,
+  continues after fixture failures, supports AbortSignal cancellation and
+  validates the final session through `ExecutionSessionResultSchema`.
+- `RunPlanSandboxAdapter` remains behind a Client Component and
+  `next/dynamic({ ssr: false })`. It creates one fresh `react-ts` provider and
+  cross-origin iframe for the active fixture, then removes it after the result
+  or ten-second timeout before the next fixture begins.
+- Separate submitted-component, JSON fixture-data, runtime-bridge and wrapper
+  virtual files keep source and data roles explicit. Fixture props are double
+  JSON serialized; no `eval`, `new Function`, executable HTML or parent-side
+  submitted-module import was added.
+- Runtime messages require the accepted source marker and protocol version plus
+  current session, run, fixture and nonce correlation and exact source-window
+  equality. Unknown, malformed and stale messages are rejected.
+- Passed requires active Sandpack completion, correlated render commit,
+  expected root DOM, meaningful visible DOM and no runtime error. Runtime,
+  blank, compile, timeout, infrastructure and cancellation are distinct strict
+  result classifications.
+- `/preflight` now exposes execution, progress, an active preview, ordered
+  results, bounded messages, totals, cancellation and rerun without adding
+  screenshots, requirement verdicts or a state atlas.
+- Automated tests use fake executors and never execute submitted source in
+  Node. Local browser evidence now confirms the documented fragile component;
+  public Vercel execution remains pending.
+
+## SS-M3-001 validation evidence
+
+| Command | Result | Important output |
+| --- | --- | --- |
+| `npm run lint` | Pass | ESLint completed with no errors or warnings |
+| `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
+| `npm run test` | Pass | Vitest 4.1.10 passed 229 tests across 20 files; all provider and executor tests use injected fakes |
+| `npm run build` | Pass | Next.js 16.2.10 produced build `IDVioscfUV_z2OQBRlmOr`; `/preflight`, `/analyze` and `/gate-0` are static pages and both APIs are server routes |
+| `git diff --check` | Pass | No whitespace errors; Git reported only the repository's existing LF-to-CRLF checkout notices |
+
+Verified optimized-output evidence:
+
+- Direct production HTTP requests to `/preflight`, `/analyze` and `/gate-0`
+  returned 200.
+- `POST /api/preflight-plan` returned 200, accepted a schema-valid plan, kept
+  `det-happy-path` first, returned eight fixtures and used deterministic
+  fallback after the locally configured provider returned `provider-error`.
+- The optimized static client output contains zero matches for `@google/genai`,
+  `GEMINI_API_KEY`, `GEMINI_MODEL`, the server planning service, the analyzer or
+  TypeScript Compiler API markers.
+- RunPlan virtual-file and runtime markers occur in one lazy client chunk and
+  have zero matches in the preflight SSR chunks. Sandpack remains the submitted-
+  code execution boundary.
+- Source inspection found no parent-side `eval`, `new Function`, executable
+  `dangerouslySetInnerHTML`, source/provider-response logging or application
+  filesystem-write path. The previous planning debug logs were removed.
+
+Local browser evidence supplied to SS-M3-001-F1:
+
+- One twelve-fixture RunPlan executed strictly serially and completed with
+  exactly nine passed and three failed results.
+- `det-empty-strings` produced a contained `runtime-error` with the sanitized
+  message `Cannot read properties of undefined (reading 'toUpperCase')`.
+- `ai-semantic-03` and `det-zero-numbers` produced `blank-render` results.
+- Fixtures after the runtime and blank failures continued and passed; the
+  parent page remained mounted.
+- **Run again** started a fresh session and reproduced the correct ordered
+  results. No stale results from the completed first execution appeared.
+- Planned requirements were not incorrectly marked passed or failed.
+
+Remaining manual evidence:
+
+- Replacement cancellation was not explicitly verified. Rerun freshness and
+  absence of stale results from a completed prior session do not prove that an
+  in-flight execution is cancelled when a replacement plan is generated.
+- Public Vercel execution verification remains pending. Gate 3 stays open until
+  the production sequence passes.
+
+## Formally accepted Gate 2 outcome
+
+The task packet records Gate 2 as passed and frozen. Public verification proved
+live Gemini requirements and semantic fixtures using
+`GEMINI_MODEL=gemini-3.1-flash-lite`, deterministic fallback, schema-valid
+RunPlan v1, the twelve-fixture cap and stable AI/deterministic ordering. That
+exact model is also the repository default, while the bounded environment
+override remains available. SS-M3-001 does not change those planning decisions.
+
+## Accepted SS-M2-002-PIVOT evidence
 
 - Gemini is the single MVP semantic-planning provider. The server-only adapter
   uses `@google/genai` with `GEMINI_API_KEY`, an optional `GEMINI_MODEL` override
-  and the verified default `gemini-2.5-flash-lite`.
+  and the committed default `gemini-3.1-flash-lite`.
 - The adapter is lazy, performs one request with SDK retries disabled, applies
   an approximately 12-second timeout, requests structured JSON and revalidates
   the parsed response through the strict `AiPlanningProposalSchema`.
@@ -34,12 +122,11 @@
 - Missing credentials, quota exhaustion, timeouts, refusals, malformed output
   and provider failures produce stable warning codes and a schema-valid
   deterministic-only RunPlan rather than HTTP 500.
-- `POST /api/preflight-plan` is a no-store Node.js boundary. `/preflight` is a
-  minimal planning diagnostic that shows contract, AI status, requirements,
-  fixtures and issues while stating that the plan was not executed.
+- `POST /api/preflight-plan` is a no-store Node.js boundary. At Gate 2
+  acceptance, `/preflight` showed contract, AI status, requirements, fixtures
+  and issues without execution.
 - Tests use injected fake providers only and make no Gemini network call. Gate 2
-  remains open; no RunPlan-to-Sandpack execution, detector, state atlas or
-  automatic fixing has begun.
+  is passed and frozen; SS-M3-001 adds execution without changing planning.
 
 ## Accepted SS-M2-001 evidence
 
@@ -57,8 +144,7 @@
   closed. Collections without defaults produce empty containers and one bounded
   coverage warning.
 - Implementation evidence exists in focused baseline, strategy, invariant,
-  JSON-safety, deduplication and limit tests. All required commands pass; Gate 2
-  remains open pending architecture review.
+  JSON-safety, deduplication and limit tests. Gate 2 is passed and frozen.
 - At SS-M2-001 acceptance, no AI integration, prompt interpretation,
   requirement extraction, semantic fixture generation, sandbox orchestration,
   state atlas, editing or UI had been added. The frozen Gate 0 and Gate 1
@@ -265,7 +351,7 @@ single serialized active invalid diagnostic. Only one compilation or fixture run
 may execute at a time, and this listener shape must not become the final
 compilation-error correlation contract.
 
-## Validation commands
+## SS-M2-002 validation commands
 
 | Command | Result | Important output |
 | --- | --- | --- |
@@ -309,13 +395,15 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No blocker affects the SS-M2-002 implementation. Gemini free-tier capacity is
-external and may vary, but deterministic fallback keeps planning available.
-Gate 2 remains open, and the frozen Gate 0, Gate 1 and RunPlan version 1
+No implementation blocker affects SS-M3-001. Gemini free-tier capacity and
+hosted Sandpack availability are external, but deterministic planning and
+bounded execution outcomes remain available within their documented limits.
+Gate 3 remains open, and the frozen Gate 0, Gate 1, Gate 2 and RunPlan version 1
 boundaries remain binding.
 
 ## Next permitted action
 
-Architecture review of the Gemini-assisted planning evidence. Do not begin
-RunPlan-to-Sandpack execution, public deployment, state-atlas work or another
-task without separate authorization.
+Deploy through the separately authorized normal repository workflow, then run
+the public Vercel execution sequence and record replacement cancellation. Do
+not mark Gate 3 passed or begin state-atlas work until the architecture
+authority accepts that production evidence.

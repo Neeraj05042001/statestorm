@@ -85,6 +85,7 @@ An issue with `severity: "error"` remains valid serialized data, but
 `isRunPlanExecutable` returns false. Warnings do not make a validated plan
 non-executable.
 
-Executability here is a contract classification only. No RunPlan-to-Sandpack
-adapter or execution-result contract exists yet, and the frozen Gate 0 sandbox
-behavior is unchanged.
+Executability remains separate from runtime outcome. SS-M3-001 adds a strict
+companion execution-result contract and a client-only RunPlan-to-Sandpack
+adapter without changing Fixture, Requirement or RunPlan v1. The frozen Gate 0
+diagnostic behavior remains unchanged.

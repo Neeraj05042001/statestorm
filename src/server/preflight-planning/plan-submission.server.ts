@@ -154,7 +154,6 @@ export async function planSubmission(
     planningIssues.push(plannerIssue("unavailable"));
   } else {
     try {
-      console.log("Calling Gemini...");
       const rawProposal = await generateWithDeadline(
         provider,
         {
@@ -166,24 +165,13 @@ export async function planSubmission(
         },
         dependencies.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       );
-      console.log("Gemini returned:");
-      console.dir(rawProposal, { depth: null });
       const parsedProposal = AiPlanningProposalSchema.safeParse(rawProposal);
       if (!parsedProposal.success) {
         throw new AiPlannerFailure("invalid-output");
       }
       proposal = parsedProposal.data;
-      console.log("Proposal validated successfully.");
       aiStatus = "generated";
     } catch (error) {
-      // const failure = isAiPlannerFailure(error)
-      //   ? error
-      //   : new AiPlannerFailure("provider-error");
-      // aiStatus = statusForFailure(failure.kind);
-      // planningIssues.push(plannerIssue(failure.kind));
-      console.log("Planner failed:");
-      console.dir(error, { depth: null });
-
       const failure = isAiPlannerFailure(error)
         ? error
         : new AiPlannerFailure("provider-error");

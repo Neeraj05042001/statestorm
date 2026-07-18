@@ -1,7 +1,16 @@
 import type { FixtureId, SampleCardFixtureProps } from "./fixtures";
 
-export const SANDBOX_EVENT_SOURCE = "statestorm-sandbox" as const;
-export const SANDBOX_PROTOCOL_VERSION = 1 as const;
+import {
+  hasSandboxSourceMarker as hasSharedSandboxSourceMarker,
+  isBoundedString,
+  isPlainObject,
+  SANDBOX_EVENT_SOURCE,
+  SANDBOX_PROTOCOL_VERSION,
+} from "../../execution/sandbox/runtime-protocol";
+
+export { isPlainObject } from "../../execution/sandbox/runtime-protocol";
+
+export { SANDBOX_EVENT_SOURCE, SANDBOX_PROTOCOL_VERSION };
 export const PROVISIONAL_INITIALIZATION_TIMEOUT_MS = 30_000;
 export const PROVISIONAL_RUN_TIMEOUT_MS = 20_000;
 
@@ -77,19 +86,6 @@ export type SandboxEvent =
 export type ProtocolValidationResult =
   | { ok: true; event: SandboxEvent }
   | { ok: false; reason: string };
-
-export function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-  return prototype === Object.prototype || prototype === null;
-}
-
-function isBoundedString(value: unknown, maximumLength: number): value is string {
-  return typeof value === "string" && value.length <= maximumLength;
-}
 
 function isFixtureId(value: unknown): value is FixtureId {
   return (
@@ -279,7 +275,7 @@ export function validateSandboxEvent(
 }
 
 export function hasSandboxSourceMarker(value: unknown): boolean {
-  return isPlainObject(value) && value.source === SANDBOX_EVENT_SOURCE;
+  return hasSharedSandboxSourceMarker(value);
 }
 
 export function sanitizeParentDiagnostic(

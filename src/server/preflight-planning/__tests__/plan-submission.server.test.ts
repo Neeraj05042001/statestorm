@@ -79,10 +79,10 @@ function provider(
 }
 
 describe("Gemini adapter construction", () => {
-  it("uses the verified stable Flash-Lite model by default without making a request", () => {
+  it("uses the publicly verified Flash-Lite model by default without making a request", () => {
     const adapter = createGeminiAiPlanner({ apiKey: "test-key-never-used" });
     expect(adapter.model).toBe(DEFAULT_GEMINI_MODEL);
-    expect(adapter.model).toBe("gemini-2.5-flash-lite");
+    expect(adapter.model).toBe("gemini-3.1-flash-lite");
   });
 
   it("does not construct a provider when GEMINI_API_KEY is absent", () => {

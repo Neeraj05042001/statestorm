@@ -559,8 +559,8 @@
 
 ## D-034: Use Gemini as the single MVP semantic-planning provider
 
-- Recommendation: Use the native `@google/genai` SDK and default to the stable
-  `gemini-2.5-flash-lite` model, with `GEMINI_API_KEY` and an optional bounded
+- Recommendation: Use the native `@google/genai` SDK and default to
+  `gemini-3.1-flash-lite`, with `GEMINI_API_KEY` and an optional bounded
   `GEMINI_MODEL` server override.
 - Reason: Official model documentation supports structured output for this
   exact identifier, and current official pricing explicitly lists a free tier
@@ -571,7 +571,9 @@
 - Risk: Provider output remains nondeterministic and may be unavailable.
 - Validation method: Official documentation review, dependency audit and fake-
   provider tests; no live provider test is required or performed.
-- Current status: Implemented for SS-M2-002; Gate 2 remains open.
+- Current status: Implemented and accepted for SS-M2-002. Public production AI
+  planning was verified with `GEMINI_MODEL=gemini-3.1-flash-lite`, now also the
+  repository default. The bounded override remains unchanged.
 
 ## D-035: Keep Gemini behind a one-request server-only boundary
 
@@ -635,3 +637,63 @@
 - Validation method: Fake-provider tests for all six statuses and RunPlan schema
   validation of every fallback.
 - Current status: Implemented for SS-M2-002; it does not execute the RunPlan.
+
+## D-039: Execute RunPlan fixtures serially
+
+- Recommendation: Preserve validated RunPlan fixture order and await exactly one
+  sandbox result before starting the next fixture.
+- Reason: Sandpack compilation diagnostics remain correlated only to one active
+  lifecycle, and ordered progress must match the accepted plan.
+- Trade-off: A twelve-fixture plan is slower than parallel execution.
+- Current status: Implemented for SS-M3-001; concurrency remains disallowed.
+
+## D-040: Use one clean Sandpack lifecycle per fixture
+
+- Recommendation: Mount one client-only `react-ts` provider and iframe for the
+  active fixture, then remove it before resolving the executor promise.
+- Reason: Clean lifecycles prevent retained DOM, runtime fallback and compiler
+  state from being accepted by a later fixture.
+- Trade-off: Hosted dependencies and compilation initialize repeatedly.
+- Current status: Implemented for the Gate 3 execution slice. Gate 0 keeps its
+  accepted same-provider recovery diagnostic unchanged.
+
+## D-041: Continue the session after fixture-level failures
+
+- Recommendation: Record runtime, blank, compile, timeout and infrastructure
+  results without stopping later fixtures.
+- Reason: One fragile state must not hide the remaining planned states.
+- Trade-off: A session can complete with multiple independent failures.
+- Current status: Implemented in the framework-independent orchestrator.
+
+## D-042: Require completion plus visible DOM evidence for success
+
+- Recommendation: Mark passed only after active Sandpack completion, correlated
+  render commit, expected root DOM, meaningful visible DOM and no runtime error.
+- Reason: Gate 0 proved that iframe creation, bundle readiness and wrapper commit
+  are insufficient success signals.
+- Trade-off: The general meaningful-DOM check remains intentionally minimal.
+- Current status: Implemented; empty and whitespace-only output is blank.
+
+## D-043: Cancel stale planning and execution ownership
+
+- Recommendation: A newer execution, new plan request, explicit cancellation or
+  component unmount aborts the current lease and invalidates late updates.
+- Reason: Results from replaced fixtures must never update the active UI.
+- Trade-off: Partial cancelled results are not resumed.
+- Current status: Implemented with AbortSignal and generation ownership.
+
+## D-044: Keep execution results separate from requirements
+
+- Recommendation: Use a strict companion execution-result schema and never add
+  result or verdict fields to Fixture, Requirement or RunPlan v1.
+- Reason: Browser render evidence does not yet verify prompt requirements.
+- Trade-off: Users review planned requirements and execution outcomes separately.
+- Current status: Implemented; no requirement pass/fail verdict exists.
+
+## D-045: Defer screenshots and the state atlas
+
+- Recommendation: Show only the active iframe, ordered status badges and bounded
+  messages in SS-M3-001.
+- Reason: Screenshot capture, atlas layout and advanced detectors require later
+  architecture decisions.
+- Current status: Deferred; no screenshot or atlas dependency was added.

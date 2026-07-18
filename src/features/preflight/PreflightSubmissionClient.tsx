@@ -7,6 +7,7 @@ import {
   type ContractIssue,
   type PreflightPlanApiResponse,
 } from "../../domain";
+import { RunPlanExecutionPanel } from "./RunPlanExecutionPanel";
 
 const exampleCode = `interface ProductCardProps {
   title: string;
@@ -134,8 +135,10 @@ function RequirementGroups({
 
 export function PreflightResultPanel({
   state,
+  onExecutionActiveChange,
 }: {
   state: PreflightPageState;
+  onExecutionActiveChange?: (active: boolean) => void;
 }) {
   const accepted =
     state.status === "complete" && state.response.accepted
@@ -230,8 +233,14 @@ export function PreflightResultPanel({
           </div>
 
           <p className="rounded-lg bg-sky-50 p-3 text-sm font-medium text-sky-950">
-            Planned, not executed. Gemini did not verify runtime behavior.
+            Gemini did not verify runtime behavior. Planned requirements are not
+            automatically verified by execution yet.
           </p>
+
+          <RunPlanExecutionPanel
+            runPlan={accepted.runPlan}
+            onExecutionActiveChange={onExecutionActiveChange}
+          />
         </div>
       ) : null}
 
@@ -247,10 +256,12 @@ export function PreflightSubmissionClient() {
   const [componentCode, setComponentCode] = useState(exampleCode);
   const [language, setLanguage] = useState<"tsx" | "jsx">("tsx");
   const [state, setState] = useState<PreflightPageState>({ status: "idle" });
+  const [executionActive, setExecutionActive] = useState(false);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (state.status === "submitting") return;
+    setExecutionActive(false);
     setState({ status: "submitting" });
 
     try {
@@ -290,6 +301,7 @@ export function PreflightSubmissionClient() {
     setPrompt(examplePrompt);
     setComponentCode(exampleCode);
     setLanguage("tsx");
+    setExecutionActive(false);
     setState({ status: "idle" });
   };
 
@@ -301,7 +313,7 @@ export function PreflightSubmissionClient() {
           <button
             type="button"
             onClick={loadExample}
-            disabled={state.status === "submitting"}
+            disabled={state.status === "submitting" || executionActive}
             className="rounded-md border border-sky-700 px-3 py-2 text-sm font-medium text-sky-800 disabled:opacity-50"
           >
             Load example
@@ -358,12 +370,19 @@ export function PreflightSubmissionClient() {
             disabled={state.status === "submitting"}
             className="rounded-md bg-slate-950 px-5 py-2.5 font-medium text-white disabled:opacity-50"
           >
-            {state.status === "submitting" ? "Planning…" : "Create preflight plan"}
+            {state.status === "submitting"
+              ? "Planning…"
+              : executionActive
+                ? "Cancel execution and create new plan"
+                : "Create preflight plan"}
           </button>
         </form>
       </section>
 
-      <PreflightResultPanel state={state} />
+      <PreflightResultPanel
+        state={state}
+        onExecutionActiveChange={setExecutionActive}
+      />
     </div>
   );
 }

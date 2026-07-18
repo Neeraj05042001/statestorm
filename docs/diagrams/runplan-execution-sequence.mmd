@@ -1,0 +1,20 @@
+sequenceDiagram
+  actor User
+  participant UI as /preflight client
+  participant Orchestrator as executeRunPlan
+  participant Adapter as Sandpack adapter
+  participant Iframe as Cross-origin iframe
+
+  User->>UI: Run planned states
+  UI->>Orchestrator: validated RunPlan + retained source + AbortSignal
+  loop Each fixture in RunPlan order
+    Orchestrator->>Adapter: executeFixture(sessionId, runId, fixture)
+    Adapter->>Iframe: fresh react-ts virtual project
+    Iframe-->>Adapter: correlated runtime event
+    Adapter->>Adapter: validate marker, nonce, IDs, type and source window
+    Iframe-->>Adapter: active Sandpack completion or diagnostic
+    Adapter-->>Orchestrator: schema-valid fixture result
+    Adapter->>Iframe: cleanup active lifecycle
+    Orchestrator-->>UI: ordered progress
+  end
+  Orchestrator-->>UI: validated completed or cancelled session

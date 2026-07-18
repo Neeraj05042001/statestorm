@@ -93,3 +93,57 @@ authority. It is not the final hackathon product demo.
    successful completion, null context error and a fresh bootstrap event.
 9. Run a final valid fixture and confirm a new correlated visible render without
    refreshing the parent page.
+
+## Gate 3 RunPlan execution verification path
+
+This sequence supplements the frozen Gate 0 path. It does not replace or weaken
+any Gate 0 check above.
+
+### Deterministic fallback
+
+1. Open `/preflight` with `GEMINI_API_KEY` unavailable.
+2. Create the example plan and confirm `det-happy-path` is first, the plan has no
+   more than twelve fixtures and the UI reports deterministic fallback.
+3. Click **Run planned states** and confirm one active preview appears.
+4. Observe the current fixture and completed/total counters. Confirm fixture IDs
+   appear in the same order as the RunPlan and never run in parallel.
+5. Wait for completion and confirm ordered status badges and pass/failure totals.
+6. Click **Run again** and confirm a new session completes.
+7. Start another execution, then create a replacement plan. Confirm the old
+   preview is removed and no stale result updates the replacement UI.
+
+### Fragile component
+
+Use the prompt and `FragileProduct` TSX source in
+`docs/RUNPLAN_EXECUTION.md`. Confirm:
+
+1. the happy-path fixture passes;
+2. the empty-string fixture produces a contained runtime error with no stack;
+3. the zero-number fixture produces a blank render;
+4. a later negative or large-number fixture still executes and passes;
+5. the parent page remains mounted throughout;
+6. **Run again** succeeds after both failures.
+
+### Recorded local Gate 3 result
+
+Local browser verification completed the twelve-fixture fragile-component path
+with exactly nine passed and three failed results. `det-empty-strings` was a
+contained runtime error with
+`Cannot read properties of undefined (reading 'toUpperCase')`.
+`ai-semantic-03` and `det-zero-numbers` were blank renders. Later fixtures
+continued and passed, the parent remained mounted, rerun created a fresh session
+with the correct order, and no requirement verdict was fabricated.
+
+The evidence did not explicitly exercise step 7 of the deterministic fallback
+path while a run was in flight. Replacement cancellation therefore remains
+pending and must be verified separately. Public Vercel execution verification
+also remains pending; Gate 3 stays open until that production path passes.
+
+### Regression and production build
+
+After the `/preflight` sequence, navigate directly to `/analyze` and `/gate-0`.
+Repeat the accepted Gate 0 safe, crash, runtime recovery, invalid-source and
+compiler-recovery sequence. Run the same checks against `npm run start` output.
+Record browser version, exact URL, session/fixture IDs, parent exceptions and
+external Sandpack network failures. Do not record manual evidence as verified
+until it has been observed.

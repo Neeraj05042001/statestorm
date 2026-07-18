@@ -12,6 +12,12 @@ public verification at `https://statestorm.vercel.app/analyze`. RunPlan version
 1, deterministic source analysis and the server-only analysis workflow are now
 frozen as the Gate 1 baseline.
 
+Gate 2 is formally accepted and frozen after public Gemini and deterministic
+fallback verification. Public production AI planning used
+`GEMINI_MODEL=gemini-3.1-flash-lite`, which is also the active repository
+default. Gate 3 is open for the SS-M3-001 RunPlan execution slice; no state
+atlas or requirement-verdict architecture is authorized.
+
 ## Current shell
 
 - Next.js 16.2.10 App Router, TypeScript, ESLint and Tailwind CSS 4
@@ -199,7 +205,7 @@ before considering the optional semantic provider. Unsupported source fails
 closed before a provider can be called. The Gemini adapter is marked
 `server-only`, initializes `@google/genai` lazily, makes one request with SDK
 retry attempts fixed at one, and enforces an approximately 12-second deadline.
-`gemini-2.5-flash-lite` is the default model; `GEMINI_MODEL` is a bounded server
+`gemini-3.1-flash-lite` is the default model; `GEMINI_MODEL` is a bounded server
 configuration override.
 
 The provider boundary accepts only the original prompt, validated
@@ -474,3 +480,42 @@ rendered a final valid fixture. Hosted Sandpack dependencies were reachable.
   post-hackathon hardening or broader product expansion.
 - Resource exhaustion, infinite-loop containment and malicious-code hardening
   remain unimplemented.
+
+## Gate 3 RunPlan execution slice
+
+SS-M3-001 connects the accepted RunPlan to Sandpack without changing the
+server-side planning path or executing submitted source in the Next.js parent.
+The browser owns a three-layer path:
+
+`React-independent execution orchestrator -> client-only Sandpack adapter -> correlated runtime protocol`
+
+The orchestrator revalidates RunPlan v1, requires the retained submission
+source, preserves the accepted fixture order, awaits one injected executor call
+at a time and validates the final Zod-backed session result. It has no React or
+Sandpack dependency, so Node tests inject fake executors without evaluating
+submitted source.
+
+The adapter is loaded through a Client Component and `next/dynamic` with
+`ssr: false`. Exactly one `react-ts` Sandpack provider and cross-origin iframe
+exist while a fixture runs. Each fixture receives fresh virtual files, including
+separate submitted source, JSON fixture data, runtime bridge and application
+wrapper. The active provider is removed after a result or ten-second timeout
+before the orchestrator advances.
+
+The runtime path reuses the Gate 0 source marker, protocol version,
+plain-object validation and source-window equality helper. RunPlan messages add
+`sessionId` to the accepted nonce, run and fixture correlation. Passed requires
+successful Sandpack completion plus a correlated render commit, expected root
+DOM and meaningful visible DOM. Runtime errors are contained by the sandbox
+ErrorBoundary; whitespace-only or empty output is a blank render.
+
+Compilation attribution remains provisional but is narrower than retained-DOM
+reuse: every fixture has a fresh single-run lifecycle, and only an active
+compilation diagnostic is accepted. A timeout is preferred to attributing an
+uncorrelated diagnostic. Gate 0 retains its original diagnostic component,
+specific evidence gates and recovery behavior.
+
+Cancellation is ownership-based. A newer execution, new planning request,
+explicit cancellation or unmount aborts the current lease. Late results and
+progress from an aborted lease are ignored. Execution results remain separate
+from requirements; no requirement verdict, screenshot or atlas exists yet.

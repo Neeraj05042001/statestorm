@@ -28,6 +28,11 @@ analysis. The service never executes, imports or writes submitted code. The
 Gemini adapter receives no component source. `/preflight` displays planned data
 only and does not send a RunPlan to Sandpack.
 
-The client page imports only domain schemas and types. The Gemini SDK, server
-planner, TypeScript runtime and analyzer must remain absent from its
-client-transitive bundle.
+After an accepted response, the client may execute the returned RunPlan through
+the separately loaded browser-only Sandpack adapter. Submitted source still does
+not execute in this Route Handler or the parent application context.
+
+The client page imports only client-safe domain, orchestration and adapter
+modules. The Gemini SDK, server planner, TypeScript runtime and analyzer must
+remain absent from its client-transitive bundle. Sandpack remains the only
+submitted-code execution boundary.

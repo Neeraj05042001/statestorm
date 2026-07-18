@@ -6,7 +6,6 @@ import { AiPlanningProposalSchema } from "../../domain";
 import type { AiPlannerInput, AiPlannerProvider } from "./provider";
 import { AiPlannerFailure } from "./provider";
 
-// export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
 export const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite";
 
 export const GEMINI_REQUEST_TIMEOUT_MS = 12_000;
@@ -175,8 +174,6 @@ export function createGeminiAiPlanner(options: {
   model?: string;
 }): AiPlannerProvider {
   const model = normalizedModel(options.model);
-  console.log("API Key exists:", !!options.apiKey);
-console.log("Model:", model);
   let client: GoogleGenAI | undefined;
 
   return {

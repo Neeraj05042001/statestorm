@@ -8,8 +8,9 @@ SS-M2-001 adds a deterministic planning layer that converts one validated
 prompt interpretation, submitted component execution and the frozen Gate 0
 sandbox.
 
-This layer generates fixtures, not a complete `RunPlan`. Requirement extraction,
-semantic fixture generation, RunPlan assembly and execution remain deferred.
+This layer generates fixtures, not a complete `RunPlan`. Later accepted layers
+assemble semantic planning and SS-M3-001 executes the final validated plan;
+deterministic generation itself remains independent of both.
 
 ## Public API
 
