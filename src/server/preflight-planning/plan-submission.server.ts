@@ -42,27 +42,33 @@ function plannerIssue(kind: AiPlannerFailureKind): ContractIssue {
   > = {
     unavailable: {
       code: RunPlanPlanningIssueCode.plannerUnavailable,
-      message: "Gemini semantic planning is unavailable; deterministic planning was preserved",
-      suggestion: "Configure available Gemini capacity to add semantic proposals",
+      message:
+        "Gemini semantic planning is unavailable; deterministic planning was preserved",
+      suggestion:
+        "Configure available Gemini capacity to add semantic proposals",
     },
     timeout: {
       code: RunPlanPlanningIssueCode.plannerTimeout,
-      message: "Gemini semantic planning exceeded its time limit; deterministic planning was preserved",
+      message:
+        "Gemini semantic planning exceeded its time limit; deterministic planning was preserved",
       suggestion: "Retry later if semantic proposals are required",
     },
     refused: {
       code: RunPlanPlanningIssueCode.plannerRefused,
-      message: "Gemini declined the semantic-planning request; deterministic planning was preserved",
+      message:
+        "Gemini declined the semantic-planning request; deterministic planning was preserved",
       suggestion: "Review the prompt while keeping component scope unchanged",
     },
     "invalid-output": {
       code: RunPlanPlanningIssueCode.plannerInvalidOutput,
-      message: "Gemini returned output that failed trusted proposal validation; deterministic planning was preserved",
+      message:
+        "Gemini returned output that failed trusted proposal validation; deterministic planning was preserved",
       suggestion: "Retry later; unvalidated provider output is never used",
     },
     "provider-error": {
       code: RunPlanPlanningIssueCode.plannerProviderError,
-      message: "Gemini semantic planning failed; deterministic planning was preserved",
+      message:
+        "Gemini semantic planning failed; deterministic planning was preserved",
       suggestion: "Retry later if semantic proposals are required",
     },
   };
@@ -148,6 +154,7 @@ export async function planSubmission(
     planningIssues.push(plannerIssue("unavailable"));
   } else {
     try {
+      console.log("Calling Gemini...");
       const rawProposal = await generateWithDeadline(
         provider,
         {
@@ -159,16 +166,28 @@ export async function planSubmission(
         },
         dependencies.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       );
+      console.log("Gemini returned:");
+      console.dir(rawProposal, { depth: null });
       const parsedProposal = AiPlanningProposalSchema.safeParse(rawProposal);
       if (!parsedProposal.success) {
         throw new AiPlannerFailure("invalid-output");
       }
       proposal = parsedProposal.data;
+      console.log("Proposal validated successfully.");
       aiStatus = "generated";
     } catch (error) {
+      // const failure = isAiPlannerFailure(error)
+      //   ? error
+      //   : new AiPlannerFailure("provider-error");
+      // aiStatus = statusForFailure(failure.kind);
+      // planningIssues.push(plannerIssue(failure.kind));
+      console.log("Planner failed:");
+      console.dir(error, { depth: null });
+
       const failure = isAiPlannerFailure(error)
         ? error
         : new AiPlannerFailure("provider-error");
+
       aiStatus = statusForFailure(failure.kind);
       planningIssues.push(plannerIssue(failure.kind));
     }
