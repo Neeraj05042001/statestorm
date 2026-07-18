@@ -124,7 +124,7 @@ Use the prompt and `FragileProduct` TSX source in
 5. the parent page remains mounted throughout;
 6. **Run again** succeeds after both failures.
 
-### Recorded local Gate 3 result
+### Recorded Gate 3 result
 
 Local browser verification completed the twelve-fixture fragile-component path
 with exactly nine passed and three failed results. `det-empty-strings` was a
@@ -134,10 +134,19 @@ contained runtime error with
 continued and passed, the parent remained mounted, rerun created a fresh session
 with the correct order, and no requirement verdict was fabricated.
 
-The evidence did not explicitly exercise step 7 of the deterministic fallback
-path while a run was in flight. Replacement cancellation therefore remains
-pending and must be verified separately. Public Vercel execution verification
-also remains pending; Gate 3 stays open until that production path passes.
+Public Vercel verification reproduced the same twelve-fixture serial execution,
+exact nine-passed/three-failed totals, contained runtime error, two blank
+renders, continuation, mounted parent and fresh ordered rerun without stale
+completed-session results.
+
+Step 7 also passed publicly. During an active rerun, a new prompt and component
+were submitted. The prior execution stopped owning the UI and its results did
+not reappear. The replacement became active and was correctly rejected with
+`UNSUPPORTED_PROP_TYPE` for `onAddToCart?: () => void`. Planned requirements
+were not falsely marked passed or failed.
+
+The architecture authority accepted the production evidence. Gate 3 is passed,
+closed and frozen.
 
 ### Regression and production build
 

@@ -697,3 +697,23 @@
 - Reason: Screenshot capture, atlas layout and advanced detectors require later
   architecture decisions.
 - Current status: Deferred; no screenshot or atlas dependency was added.
+
+## D-046: Accept and freeze the Gate 3 RunPlan execution baseline
+
+- Recommendation: Accept SS-M3-001 at
+  `1aba17aa5d9d97ae76521f76bf00987fef685cea` as the frozen Gate 3 baseline for
+  serialized RunPlan fixture execution through the client-only Sandpack
+  boundary.
+- Reason: Local and public Vercel evidence proved a twelve-fixture serial run
+  with exact nine-passed and three-failed outcomes, continuation after runtime
+  and blank failures, parent survival, fresh ordered reruns, replacement
+  cancellation and rejection of stale results.
+- Replacement evidence: A new prompt and component submitted during an active
+  rerun removed the prior execution's UI ownership. Its results did not
+  reappear, and the replacement became active before being correctly rejected
+  with `UNSUPPORTED_PROP_TYPE` for `onAddToCart?: () => void`.
+- Preserved boundary: Execution results do not verify planned requirements, and
+  Gate 3 adds no screenshots, visual atlas or advanced detector behavior.
+- Current status: Accepted by the ChatGPT Project architecture authority. Gate
+  3 is passed, closed and frozen. The next authorized milestone is the visual
+  state atlas and essential user-facing detectors.

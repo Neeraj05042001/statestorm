@@ -186,8 +186,9 @@
     memory or hostile infinite-loop containment.
 59. **No execution persistence.** Cancellation, navigation and reload discard
     partial or complete execution sessions.
-60. **Final Gate 3 verification is incomplete.** Local fragile-component
-    execution, serial continuation and rerun freshness passed, but public Vercel
-    execution remains pending. Replacement cancellation also lacks explicit
-    manual evidence; completed-session rerun freshness is not a substitute for
-    cancelling an in-flight run with a replacement plan.
+60. **Gate 3 verification is point-in-time evidence.** Local and public Vercel
+    verification proved the twelve-fixture serial run, exact nine-passed and
+    three-failed outcomes, continuation, rerun freshness, in-flight replacement
+    cancellation and stale-result rejection. Gate 3 is passed, closed and
+    frozen, but that evidence does not guarantee future hosted Sandpack
+    availability or remove the security and product limitations above.

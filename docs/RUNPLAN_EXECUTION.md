@@ -3,9 +3,10 @@
 ## Status and scope
 
 SS-M3-001 connects an accepted executable RunPlan v1 to the frozen Gate 0
-Sandpack boundary. Gate 3 remains open. This slice executes planned fixtures and
-reports observable render outcomes; it does not verify prompt requirements,
-capture screenshots, build a state atlas or add advanced detectors.
+Sandpack boundary. Gate 3 is passed, closed and frozen. This baseline executes
+planned fixtures and reports observable render outcomes; it does not verify
+prompt requirements, capture screenshots, build a state atlas or add advanced
+detectors.
 
 ## Execution layers
 
@@ -144,7 +145,7 @@ pass. Run the same plan again to verify a fresh session after both failures.
 Automated tests prove the classifications, ordering, continuation, cancellation
 and schema boundaries.
 
-## Recorded local browser evidence
+## Recorded local and public browser evidence
 
 Local fragile-component verification passed with one twelve-fixture RunPlan:
 
@@ -158,7 +159,17 @@ Local fragile-component verification passed with one twelve-fixture RunPlan:
 - no stale results from the completed first execution appeared; and
 - no planned requirement was marked passed or failed.
 
-Replacement cancellation remains pending because the supplied evidence did not
-explicitly start a run and generate a replacement plan while it was in flight.
-Public Vercel execution verification also remains pending. Gate 3 remains open
-until production verification passes.
+Public Vercel verification reproduced the twelve-fixture sequence with the same
+exact nine passed and three failed results, the same contained runtime and blank
+classifications, continuation after both failure types, a mounted parent and a
+fresh ordered rerun without completed-session results reappearing.
+
+Replacement cancellation and stale-result rejection also passed publicly.
+During an active rerun, a new prompt and component submission stopped the prior
+execution from owning the UI, and none of its results reappeared. The replacement
+became active and was correctly rejected with `UNSUPPORTED_PROP_TYPE` for
+`onAddToCart?: () => void`. No planned requirement was marked passed or failed.
+
+The architecture authority accepted this evidence. Gate 3 is passed, closed and
+frozen; the next authorized milestone is the visual state atlas and essential
+user-facing detectors.

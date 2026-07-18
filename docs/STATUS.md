@@ -2,18 +2,24 @@
 
 ## Current work
 
-- Gate: Gate 3 (open)
-- Task: SS-M3-001 (active)
-- State: Local fragile-component browser verification passed; public Vercel execution and replacement-cancellation verification pending
+- Gate: Gate 3 (passed, closed and frozen)
+- Task: SS-M3-001 (completed)
+- State: Public Vercel execution, rerun freshness, replacement cancellation and stale-result rejection passed
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: Gate 2 Gemini-assisted and deterministic fallback planning baseline
+- Latest accepted milestone: Gate 3 serialized RunPlan sandbox-execution baseline
 - Gate 0 execution architecture: Frozen and reused through narrow protocol primitives
 - RunPlan version 1: Frozen and unchanged
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
 - Gate 2 baseline: Frozen deterministic fixtures, Gemini proposal boundary, trusted materialization and stable RunPlan assembly
+- Gate 3 baseline: Frozen serialized fixture execution through the client-only Sandpack boundary, validated execution results and stale-session ownership rejection
 
-## Active SS-M3-001 evidence
+## Formally accepted Gate 3 outcome
+
+The ChatGPT Project architecture authority accepted SS-M3-001 at
+`1aba17aa5d9d97ae76521f76bf00987fef685cea` after the required public Vercel
+execution and replacement-cancellation evidence passed. Gate 3 is closed and
+the execution baseline below is frozen.
 
 - The accepted RunPlan retains the submitted component source and language, so
   execution requires no server-side submitted-module import or evaluation.
@@ -40,8 +46,8 @@
   results, bounded messages, totals, cancellation and rerun without adding
   screenshots, requirement verdicts or a state atlas.
 - Automated tests use fake executors and never execute submitted source in
-  Node. Local browser evidence now confirms the documented fragile component;
-  public Vercel execution remains pending.
+  Node. Local and public Vercel browser evidence confirm the documented fragile
+  component, serial continuation, rerun freshness and stale-session rejection.
 
 ## SS-M3-001 validation evidence
 
@@ -83,13 +89,23 @@ Local browser evidence supplied to SS-M3-001-F1:
   results. No stale results from the completed first execution appeared.
 - Planned requirements were not incorrectly marked passed or failed.
 
-Remaining manual evidence:
+Public Vercel evidence accepted for Gate 3 closure:
 
-- Replacement cancellation was not explicitly verified. Rerun freshness and
-  absence of stale results from a completed prior session do not prove that an
-  in-flight execution is cancelled when a replacement plan is generated.
-- Public Vercel execution verification remains pending. Gate 3 stays open until
-  the production sequence passes.
+- A twelve-fixture RunPlan executed strictly serially and completed with the
+  same exact nine passed and three failed results recorded locally.
+- `det-empty-strings` produced the contained `runtime-error`
+  `Cannot read properties of undefined (reading 'toUpperCase')`;
+  `ai-semantic-03` and `det-zero-numbers` produced `blank-render` results.
+- Later fixtures continued and passed after both failure types, and the parent
+  page remained mounted.
+- **Run again** created a fresh ordered execution session without stale results
+  from the completed prior session.
+- During an active rerun, submitting a new prompt and component removed the
+  previous execution's UI ownership. Its results did not reappear, and the
+  replacement submission became active.
+- The replacement was correctly rejected with `UNSUPPORTED_PROP_TYPE` for
+  `onAddToCart?: () => void`.
+- Planned requirements were not incorrectly marked passed or failed.
 
 ## Formally accepted Gate 2 outcome
 
@@ -395,15 +411,14 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No implementation blocker affects SS-M3-001. Gemini free-tier capacity and
-hosted Sandpack availability are external, but deterministic planning and
-bounded execution outcomes remain available within their documented limits.
-Gate 3 remains open, and the frozen Gate 0, Gate 1, Gate 2 and RunPlan version 1
-boundaries remain binding.
+No implementation blocker affects the accepted SS-M3-001 baseline. Gemini
+free-tier capacity and hosted Sandpack availability remain external, but
+deterministic planning and bounded execution outcomes remain available within
+their documented limits. Gate 3 is passed, closed and frozen, and the Gate 0,
+Gate 1, Gate 2 and RunPlan version 1 boundaries remain binding.
 
 ## Next permitted action
 
-Deploy through the separately authorized normal repository workflow, then run
-the public Vercel execution sequence and record replacement cancellation. Do
-not mark Gate 3 passed or begin state-atlas work until the architecture
-authority accepts that production evidence.
+The next authorized milestone is the visual state atlas and essential
+user-facing detectors. That work requires its own scoped task; SS-M3-001-F2
+records Gate 3 closure only and does not begin Gate 4 implementation.
