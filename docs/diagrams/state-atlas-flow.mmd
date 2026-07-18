@@ -1,0 +1,11 @@
+flowchart TD
+  A["Completed ExecutionSessionResult"] --> B["Validate RunPlan and session"]
+  B --> C["Correlate one result per fixture"]
+  C --> D["Derive ordered State Atlas entries"]
+  D --> E["Validate StateAtlasSchema"]
+  E --> F["Summary, filters, and state cards"]
+  F --> G{"Selected recorded status"}
+  G -->|"passed"| H["One client-only Sandpack inspection rerender"]
+  G -->|"failed or blank"| I["Recorded-evidence overlay"]
+  H --> J["Recorded execution remains authoritative"]
+  I --> J

@@ -9,30 +9,48 @@ import {
 } from "../../domain";
 import { RunPlanExecutionPanel } from "./RunPlanExecutionPanel";
 
-const exampleCode = `interface ProductCardProps {
+export const atlasExampleCode = `interface AtlasProductCardProps {
   title: string;
   price: number;
+  imageUrl: string;
   featured: boolean;
   tone?: "calm" | "urgent";
 }
 
-export default function ProductCard({
-  title,
-  price,
-  featured,
+export default function AtlasProductCard({
+  title = "Everyday mug",
+  price = 24.99,
+  imageUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='100'%3E%3Crect width='160' height='100' fill='%230ea5e9'/%3E%3C/svg%3E",
+  featured = true,
   tone = "calm",
-}: ProductCardProps) {
+}: AtlasProductCardProps) {
+  if (!title) throw new Error("Atlas product title must not be empty");
+  if (price === 0) return null;
+
   return (
-    <article data-tone={tone}>
-      <h2>{title}</h2>
+    <article
+      data-tone={tone}
+      style={{ width: 240, padding: 16, border: "1px solid #cbd5e1" }}
+    >
+      <img
+        src={imageUrl}
+        alt={title + " product"}
+        style={{ display: "block", width: 160, height: 100 }}
+      />
+      <h2
+        data-testid="product-title"
+        style={{ maxWidth: 180, whiteSpace: "nowrap", overflow: "hidden" }}
+      >
+        {title}
+      </h2>
       <p>{price.toFixed(2)}</p>
-      {featured ? <strong>Featured</strong> : null}
+      {featured ? <strong>Featured product</strong> : null}
     </article>
   );
 }`;
 
-const examplePrompt =
-  "Create a calm product card with a clear title and price. Featured products should feel prominent, and unusually long titles should remain understandable.";
+export const atlasExamplePrompt =
+  "Render a product card with a title, price, image, featured treatment and calm or urgent tone. Exercise empty, zero-price, long-title and invalid-image states.";
 
 export type PreflightPageState =
   | { status: "idle" }
@@ -252,8 +270,8 @@ export function PreflightResultPanel({
 }
 
 export function PreflightSubmissionClient() {
-  const [prompt, setPrompt] = useState(examplePrompt);
-  const [componentCode, setComponentCode] = useState(exampleCode);
+  const [prompt, setPrompt] = useState(atlasExamplePrompt);
+  const [componentCode, setComponentCode] = useState(atlasExampleCode);
   const [language, setLanguage] = useState<"tsx" | "jsx">("tsx");
   const [state, setState] = useState<PreflightPageState>({ status: "idle" });
   const [executionActive, setExecutionActive] = useState(false);
@@ -298,8 +316,8 @@ export function PreflightSubmissionClient() {
   };
 
   const loadExample = () => {
-    setPrompt(examplePrompt);
-    setComponentCode(exampleCode);
+    setPrompt(atlasExamplePrompt);
+    setComponentCode(atlasExampleCode);
     setLanguage("tsx");
     setExecutionActive(false);
     setState({ status: "idle" });

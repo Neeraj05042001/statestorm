@@ -717,3 +717,69 @@
 - Current status: Accepted by the ChatGPT Project architecture authority. Gate
   3 is passed, closed and frozen. The next authorized milestone is the visual
   state atlas and essential user-facing detectors.
+
+## D-047: Run essential visual detectors inside the sandbox
+
+- Recommendation: Inspect layout and image state only inside the active
+  correlated Sandpack iframe and return bounded plain metadata.
+- Reason: Submitted DOM must not cross into or be queried by the parent page.
+- Trade-off: Detector logic is part of the generated virtual runtime bridge.
+- Current status: Implemented locally for SS-M4-001; Gate 4 review is pending.
+
+## D-048: Supplement rather than replace execution status
+
+- Recommendation: Attach validated visual findings to a fixture result while
+  preserving the frozen Gate 3 status vocabulary and evidence booleans.
+- Reason: A component can render successfully while containing overflow or a
+  confirmed broken image.
+- Trade-off: Atlas display categories and execution status are related but
+  intentionally distinct.
+- Current status: Implemented locally for SS-M4-001.
+
+## D-049: Use conservative overflow wording and bounds
+
+- Recommendation: Use a two-pixel scroll/client comparison, inspect at most 200
+  visible non-infrastructure candidates and report at most five warnings.
+- Reason: Overflow is heuristic and cannot prove a prompt requirement failed.
+- Trade-off: Intentional clipping can be reported and late or transform-only
+  overflow can be missed.
+- Current status: Implemented and documented as possible layout overflow.
+
+## D-050: Require completed image failure evidence
+
+- Recommendation: Report an image only when `complete` is true and
+  `naturalWidth` is zero, and expose only source classification plus alt
+  presence.
+- Reason: Pending images are not reliable failures, and complete URLs are not
+  required evidence.
+- Trade-off: Slow images unresolved during the settle window are omitted.
+- Current status: Implemented locally for SS-M4-001.
+
+## D-051: Do not create a sandbox for each atlas card
+
+- Recommendation: Keep atlas cards as parent-owned recorded data and mount at
+  most one client-only Sandpack for the selected passed fixture.
+- Reason: Parallel card iframes would violate serialized execution ownership
+  and multiply hosted compiler lifecycles.
+- Trade-off: Only one state is live-inspectable at a time.
+- Current status: Implemented locally; one-sandbox browser evidence is pending.
+
+## D-052: Permit one selected fixture inspection rerender
+
+- Recommendation: Rerender only the selected recorded fixture after execution
+  has completed, using its original source and JSON props through the Gate 3
+  virtual-file boundary.
+- Reason: A judge needs a visible selected state without inserting submitted DOM
+  into the parent.
+- Trade-off: Inspection is a new render, not a screenshot of the recorded run.
+- Current status: Implemented locally for passed entries; failed and blank
+  entries use recorded-evidence overlays.
+
+## D-053: Keep recorded execution authoritative and screenshots excluded
+
+- Recommendation: Never let inspection output alter the completed session,
+  detector findings or atlas categories; add no screenshot capture.
+- Reason: Rerender timing and external resource availability can differ from the
+  recorded execution.
+- Trade-off: The visible inspection can diverge from point-in-time evidence.
+- Current status: Implemented locally; screenshot capture remains excluded.

@@ -33,6 +33,29 @@ function renderMessage(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function detectorMessage(overrides: Record<string, unknown> = {}) {
+  return {
+    source: SANDBOX_EVENT_SOURCE,
+    protocolVersion: SANDBOX_PROTOCOL_VERSION,
+    ...expected,
+    type: "DETECTOR_EVIDENCE",
+    observations: [
+      {
+        kind: "layout-overflow",
+        evidence: {
+          detector: "overflow-v1",
+          elementTag: "H2",
+          axis: "horizontal",
+          clientWidth: 180,
+          scrollWidth: 420,
+        },
+      },
+    ],
+    warnings: [],
+    ...overrides,
+  };
+}
+
 describe("RunPlan sandbox runtime protocol", () => {
   it.each([
     ["nonce", "wrong-nonce"],
@@ -137,5 +160,87 @@ describe("RunPlan sandbox runtime protocol", () => {
       event: { type: "RUNTIME_ERROR" },
     });
     expect(JSON.stringify(validation)).not.toContain("stack");
+  });
+
+  it("accepts valid correlated detector evidence", () => {
+    expect(validateRunPlanSandboxEvent(detectorMessage(), expected)).toMatchObject({
+      ok: true,
+      event: {
+        type: "DETECTOR_EVIDENCE",
+        observations: [{ kind: "layout-overflow" }],
+      },
+    });
+  });
+
+  it.each([
+    ["sessionId", "session-stale"],
+    ["runId", "run-stale"],
+    ["fixtureId", "fixture-stale"],
+    ["nonce", "nonce-stale"],
+  ])("rejects detector evidence with an incorrect %s", (field, value) => {
+    expect(
+      validateRunPlanSandboxEvent(
+        detectorMessage({ [field]: value }),
+        expected,
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("rejects excessive detector findings and unknown detector kinds", () => {
+    const overflowObservation = detectorMessage().observations[0];
+    expect(
+      validateRunPlanSandboxEvent(
+        detectorMessage({
+          observations: Array.from({ length: 6 }, () => overflowObservation),
+        }),
+        expected,
+      ).ok,
+    ).toBe(false);
+    expect(
+      validateRunPlanSandboxEvent(
+        detectorMessage({
+          observations: [
+            {
+              kind: "screenshot-diff",
+              evidence: { detector: "unknown-v1" },
+            },
+          ],
+        }),
+        expected,
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("rejects non-finite dimensions, unbounded strings, and unknown fields", () => {
+    expect(
+      validateRunPlanSandboxEvent(
+        detectorMessage({
+          observations: [
+            {
+              kind: "layout-overflow",
+              evidence: {
+                detector: "overflow-v1",
+                axis: "horizontal",
+                clientWidth: 180,
+                scrollWidth: Number.POSITIVE_INFINITY,
+              },
+            },
+          ],
+        }),
+        expected,
+      ).ok,
+    ).toBe(false);
+    expect(
+      validateRunPlanSandboxEvent(
+        detectorMessage({ warnings: ["x".repeat(301)] }),
+        expected,
+      ).ok,
+    ).toBe(false);
+    expect(
+      validateRunPlanSandboxEvent(
+        { ...detectorMessage(), submittedSource: "do not accept" },
+        expected,
+      ).ok,
+    ).toBe(false);
   });
 });

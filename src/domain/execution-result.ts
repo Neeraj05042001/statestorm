@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { DetectorFindingSchema } from "./detector-finding";
+
 const NonEmptyBoundedStringSchema = z.string().trim().min(1).max(1_000);
 
 export const FixtureExecutionStatusSchema = z.enum([
@@ -19,13 +21,39 @@ export const FixtureExecutionEvidenceSchema = z.strictObject({
   meaningfulDomFound: z.boolean(),
 });
 
-export const FixtureExecutionResultSchema = z.strictObject({
-  fixtureId: z.string().trim().min(1).max(256),
-  status: FixtureExecutionStatusSchema,
-  summary: NonEmptyBoundedStringSchema,
-  sanitizedMessage: z.string().trim().min(1).max(1_000).optional(),
-  evidence: FixtureExecutionEvidenceSchema,
-});
+export const FixtureExecutionResultSchema = z
+  .strictObject({
+    fixtureId: z.string().trim().min(1).max(256),
+    status: FixtureExecutionStatusSchema,
+    summary: NonEmptyBoundedStringSchema,
+    sanitizedMessage: z.string().trim().min(1).max(1_000).optional(),
+    evidence: FixtureExecutionEvidenceSchema,
+    visualFindings: z.array(DetectorFindingSchema).max(10).optional(),
+    detectorWarnings: z
+      .array(z.string().trim().min(1).max(300))
+      .max(2)
+      .optional(),
+  })
+  .superRefine((result, context) => {
+    const findingIds = new Set<string>();
+    result.visualFindings?.forEach((finding, index) => {
+      if (finding.fixtureId !== result.fixtureId) {
+        context.addIssue({
+          code: "custom",
+          path: ["visualFindings", index, "fixtureId"],
+          message: "Visual finding must match its fixture execution result.",
+        });
+      }
+      if (findingIds.has(finding.id)) {
+        context.addIssue({
+          code: "custom",
+          path: ["visualFindings", index, "id"],
+          message: "Visual finding IDs must be unique within a fixture result.",
+        });
+      }
+      findingIds.add(finding.id);
+    });
+  });
 
 export const ExecutionSessionResultSchema = z.strictObject({
   sessionId: z.string().trim().min(1).max(256),

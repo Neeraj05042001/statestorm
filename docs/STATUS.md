@@ -2,9 +2,9 @@
 
 ## Current work
 
-- Gate: Gate 3 (passed, closed and frozen)
-- Task: SS-M3-001 (completed)
-- State: Public Vercel execution, rerun freshness, replacement cancellation and stale-result rejection passed
+- Gate: Gate 4 (open; Gate 0 through Gate 3 passed, closed and frozen)
+- Task: SS-M4-001 (active)
+- State: Architecture authority accepted the local implementation; production-build browser verification passed; public Vercel verification remains pending
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
 - Latest accepted milestone: Gate 3 serialized RunPlan sandbox-execution baseline
@@ -13,6 +13,86 @@
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
 - Gate 2 baseline: Frozen deterministic fixtures, Gemini proposal boundary, trusted materialization and stable RunPlan assembly
 - Gate 3 baseline: Frozen serialized fixture execution through the client-only Sandpack boundary, validated execution results and stale-session ownership rejection
+- Gate 4 scope: Essential overflow and broken-image detectors, validated State Atlas, judge-facing filters/cards and one selected-state inspection rerender only
+
+## Active SS-M4-001 implementation evidence
+
+Gate 4 is open. The local implementation now includes:
+
+- strict `DetectorFindingSchema`, bounded detector observations and fixture-
+  matching refinements on execution results;
+- a 750 ms in-sandbox settle window, conservative overflow inspection and
+  confirmed broken-image inspection with at most five observations per
+  detector;
+- strict detector-event keys, existing session/run/fixture/nonce correlation,
+  exact source-window validation, finite dimensions and deterministic parent-
+  assigned finding IDs;
+- detector-unavailable behavior that preserves the execution result and emits
+  no false finding;
+- a pure validated State Atlas builder with exact fixture coverage, RunPlan
+  order, deterministic category priority and input immutability;
+- summary metrics, accessible filters, meaningful state cards, first-issue
+  selection, safe filter selection and retained detailed execution evidence;
+- one selected passed-state client-only Sandpack rerender, plus recorded-
+  evidence overlays for runtime, compile, blank, timeout, infrastructure and
+  cancelled states; and
+- a reliable built-in `AtlasProductCard` source whose deterministic boundaries
+  can expose runtime, blank, long-title overflow and invalid-image behavior.
+
+Current automated evidence: Vitest passes 264 tests across 26 files, including
+the prior 229 tests and 35 new focused tests. The required lint, typecheck, test,
+production build and diff checks pass.
+
+| Command | Result | Important output |
+| --- | --- | --- |
+| `npm run lint` | Pass | ESLint completed with zero errors and zero warnings |
+| `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
+| `npm run test` | Pass | Vitest 4.1.10 passed 264 tests across 26 files |
+| `npm run build` | Pass | Next.js 16.2.10 compiled, type-checked and statically prerendered `/preflight`, `/analyze` and `/gate-0` |
+| `git diff --check` | Pass | No whitespace errors; only existing LF-to-CRLF checkout notices were printed |
+
+The final built server returned HTTP 200 for `/preflight`, `/analyze` and
+`/gate-0`; the prerendered `/preflight` HTML contains the `AtlasProductCard`
+example. Optimized static output has zero matches for the Gemini SDK or key
+names, server planning implementation, source analyzer and TypeScript compiler
+entry markers. The four State Atlas/execution-specific optimized chunks have
+zero matches for parent `eval`, `new Function`, `dangerouslySetInnerHTML`, source
+logging and filesystem-write markers. Detector runtime and inspection markers
+remain isolated to the expected lazy client chunks.
+
+## SS-M4-001 local production browser evidence
+
+The architecture authority accepted SS-M4-001 locally. Manual verification
+against the production build passed:
+
+- completed execution produced a validated Interactive State Atlas;
+- runtime errors and blank renders retained their Gate 3 classifications;
+- constrained long-content states produced conservative overflow warnings;
+- confirmed broken images were recorded without exposing complete URLs;
+- summary counts and All, Issues, Clean, Runtime, Blank, Overflow and Broken
+  images filters behaved correctly;
+- the first issue was selected predictably;
+- selecting a clean state mounted one live inspection Sandpack, and changing
+  selection replaced the prior inspection lifecycle;
+- runtime and blank states displayed recorded-evidence overlays;
+- inspection rerenders did not overwrite recorded execution results;
+- **Run again** cleared and recreated the atlas correctly; and
+- no screenshot capture or requirement verdict was added.
+
+An initial happy-path timeout was isolated and non-reproducible. The happy path
+passed on rerun and after a hard refresh, and Other failures returned to zero.
+This is recorded as point-in-time evidence rather than a reproducible defect.
+
+A hydration warning was traced to a browser extension injecting the
+`cz-shortcut-listen` attribute into `body`. The warning disappeared in incognito
+mode with extensions disabled. It is not a StateStorm defect, and no
+`suppressHydrationWarning` or `layout.tsx` change was made.
+
+Public Vercel Atlas verification remains pending. Gate 4 stays open until that
+public evidence is recorded and accepted.
+
+Final product polish, submission work, screenshots, persistence, editing,
+responsive matrices and prompt-requirement verdicts remain outside SS-M4-001.
 
 ## Formally accepted Gate 3 outcome
 
@@ -411,14 +491,15 @@ compilation-error correlation contract.
 
 ## Blockers
 
-No implementation blocker affects the accepted SS-M3-001 baseline. Gemini
-free-tier capacity and hosted Sandpack availability remain external, but
-deterministic planning and bounded execution outcomes remain available within
-their documented limits. Gate 3 is passed, closed and frozen, and the Gate 0,
-Gate 1, Gate 2 and RunPlan version 1 boundaries remain binding.
+No implementation, automated-validation or local production-browser blocker
+affects SS-M4-001. Public Vercel Atlas verification remains pending. Gemini
+free-tier capacity and hosted Sandpack availability remain external. Gate 3 is
+passed, closed and frozen, and the Gate 0, Gate 1, Gate 2 and RunPlan version 1
+boundaries remain binding.
 
 ## Next permitted action
 
-The next authorized milestone is the visual state atlas and essential
-user-facing detectors. That work requires its own scoped task; SS-M3-001-F2
-records Gate 3 closure only and does not begin Gate 4 implementation.
+Verify the documented `AtlasProductCard` path on the public Vercel deployment,
+including detector findings, filters, selected inspection lifecycle, overlays
+and rerun freshness. Submit that public evidence to the ChatGPT Project
+architecture authority before marking Gate 4 passed. Do not begin final polish.

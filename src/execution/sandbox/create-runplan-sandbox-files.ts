@@ -24,6 +24,11 @@ const ROOT_ID = "statestorm-fixture-root";
 const MAX_ERROR_NAME_LENGTH = 120;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 const MAX_RENDERED_TEXT_LENGTH = 20000;
+const DETECTOR_SETTLE_MS = 750;
+const OVERFLOW_TOLERANCE_PX = 2;
+const MAX_INSPECTED_ELEMENTS = 200;
+const MAX_INSPECTED_IMAGES = 100;
+const MAX_FINDINGS_PER_DETECTOR = 5;
 const MEANINGFUL_TAGS = new Set([
   "BUTTON",
   "CANVAS",
@@ -127,17 +132,151 @@ function collectRenderEvidence() {
   };
 }
 
+function elementHint(element: Element): string | undefined {
+  const testId = element
+    .getAttribute("data-testid")
+    ?.trim()
+    .replace(/[^A-Za-z0-9_.-]/g, "")
+    .slice(0, 96);
+  if (testId) return '[data-testid="' + testId + '"]';
+  const id = element.id
+    .trim()
+    .replace(/[^A-Za-z0-9_.-]/g, "")
+    .slice(0, 120);
+  return id ? '#' + id : undefined;
+}
+
+function boundedDimension(value: number): number {
+  return Math.min(10000000, Math.max(0, Math.round(value)));
+}
+
+function overflowObservation(element: Element) {
+  if (!isVisiblyRendered(element)) return null;
+  if (element.closest('[data-statestorm-infrastructure="true"]')) return null;
+  const htmlElement = element as HTMLElement;
+  if (htmlElement.clientWidth <= 0 || htmlElement.clientHeight <= 0) return null;
+  const horizontal =
+    htmlElement.scrollWidth > htmlElement.clientWidth + OVERFLOW_TOLERANCE_PX;
+  const vertical =
+    htmlElement.scrollHeight > htmlElement.clientHeight + OVERFLOW_TOLERANCE_PX;
+  if (!horizontal && !vertical) return null;
+
+  return {
+    kind: "layout-overflow",
+    evidence: {
+      detector: "overflow-v1",
+      elementTag: element.tagName.slice(0, 32),
+      ...(elementHint(element) ? { elementHint: elementHint(element) } : {}),
+      axis: horizontal && vertical ? "both" : horizontal ? "horizontal" : "vertical",
+      clientWidth: boundedDimension(htmlElement.clientWidth),
+      scrollWidth: boundedDimension(htmlElement.scrollWidth),
+      clientHeight: boundedDimension(htmlElement.clientHeight),
+      scrollHeight: boundedDimension(htmlElement.scrollHeight),
+    },
+  };
+}
+
+function collectOverflowObservations(root: HTMLElement) {
+  const observations: Record<string, unknown>[] = [];
+  const candidates = [
+    root,
+    ...Array.from(root.querySelectorAll("*")).slice(0, MAX_INSPECTED_ELEMENTS - 1),
+  ];
+
+  for (const candidate of candidates) {
+    const observation = overflowObservation(candidate);
+    if (observation) observations.push(observation);
+    if (observations.length >= MAX_FINDINGS_PER_DETECTOR) break;
+  }
+  return observations;
+}
+
+function imageSourceKind(source: string | null) {
+  const normalized = source?.trim() ?? "";
+  if (!normalized) return "empty";
+  if (normalized.toLowerCase().startsWith("data:")) return "data";
+  if (/^(?:https?:)?\/\//i.test(normalized)) return "external";
+  return "relative";
+}
+
+function collectBrokenImageObservations(root: HTMLElement) {
+  const observations: Record<string, unknown>[] = [];
+  const images = Array.from(root.querySelectorAll("img")).slice(
+    0,
+    MAX_INSPECTED_IMAGES,
+  );
+
+  for (const image of images) {
+    if (!image.complete || image.naturalWidth !== 0) continue;
+    observations.push({
+      kind: "broken-image",
+      evidence: {
+        detector: "broken-image-v1",
+        elementTag: "IMG",
+        ...(elementHint(image) ? { elementHint: elementHint(image) } : {}),
+        imageAltPresent: image.alt.trim().length > 0,
+        imageSourceKind: imageSourceKind(image.getAttribute("src")),
+      },
+    });
+    if (observations.length >= MAX_FINDINGS_PER_DETECTOR) break;
+  }
+  return observations;
+}
+
+function collectDetectorPayload() {
+  const root = document.getElementById(ROOT_ID);
+  if (!root) {
+    return {
+      observations: [],
+      warnings: ["Visual detectors could not find the correlated fixture root."],
+    };
+  }
+
+  const observations: Record<string, unknown>[] = [];
+  const warnings: string[] = [];
+  try {
+    observations.push(...collectOverflowObservations(root));
+  } catch {
+    warnings.push("The layout detector was unavailable for this fixture.");
+  }
+  try {
+    observations.push(...collectBrokenImageObservations(root));
+  } catch {
+    warnings.push("The image detector was unavailable for this fixture.");
+  }
+  return { observations, warnings };
+}
+
 function RenderCommitReporter() {
   useEffect(() => {
+    let detectorTimeoutId: number | undefined;
     const timeoutId = window.setTimeout(() => {
+      const evidence = collectRenderEvidence();
       postEvent({
         ...baseEvent(),
         type: "RENDER_COMMITTED",
-        evidence: collectRenderEvidence(),
+        evidence,
       });
+
+      if (evidence.expectedDomFound && evidence.meaningfulDomFound) {
+        detectorTimeoutId = window.setTimeout(() => {
+          const detectorPayload = collectDetectorPayload();
+          postEvent({
+            ...baseEvent(),
+            type: "DETECTOR_EVIDENCE",
+            observations: detectorPayload.observations,
+            warnings: detectorPayload.warnings,
+          });
+        }, DETECTOR_SETTLE_MS);
+      }
     }, 0);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (detectorTimeoutId !== undefined) {
+        window.clearTimeout(detectorTimeoutId);
+      }
+    };
   }, []);
 
   return null;

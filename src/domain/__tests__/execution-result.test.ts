@@ -24,6 +24,34 @@ describe("execution result contracts", () => {
     ).toMatchObject({ status: "passed" });
   });
 
+  it("supplements a passed result with visual findings without changing status", () => {
+    const result = FixtureExecutionResultSchema.parse({
+      fixtureId: "det-long-strings",
+      status: "passed",
+      summary: "Visible output rendered.",
+      evidence,
+      visualFindings: [
+        {
+          id: "detector-long-overflow-1",
+          fixtureId: "det-long-strings",
+          kind: "layout-overflow",
+          severity: "warning",
+          summary: "Possible horizontal layout overflow was detected.",
+          evidence: {
+            detector: "overflow-v1",
+            elementTag: "H2",
+            axis: "horizontal",
+            clientWidth: 180,
+            scrollWidth: 420,
+          },
+        },
+      ],
+    });
+
+    expect(result.status).toBe("passed");
+    expect(result.visualFindings).toHaveLength(1);
+  });
+
   it.each([
     "compile-error",
     "runtime-error",
@@ -64,6 +92,33 @@ describe("execution result contracts", () => {
         summary: "Runtime error.",
         rawError: new Error("must not cross the result boundary"),
         evidence,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects a finding correlated to another fixture", () => {
+    expect(
+      FixtureExecutionResultSchema.safeParse({
+        fixtureId: "fixture-current",
+        status: "passed",
+        summary: "Visible output rendered.",
+        evidence,
+        visualFindings: [
+          {
+            id: "detector-stale-overflow-1",
+            fixtureId: "fixture-stale",
+            kind: "layout-overflow",
+            severity: "warning",
+            summary: "Possible horizontal layout overflow was detected.",
+            evidence: {
+              detector: "overflow-v1",
+              elementTag: "H2",
+              axis: "horizontal",
+              clientWidth: 180,
+              scrollWidth: 420,
+            },
+          },
+        ],
       }).success,
     ).toBe(false);
   });

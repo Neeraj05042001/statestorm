@@ -15,8 +15,9 @@ frozen as the Gate 1 baseline.
 Gate 2 is formally accepted and frozen after public Gemini and deterministic
 fallback verification. Public production AI planning used
 `GEMINI_MODEL=gemini-3.1-flash-lite`, which is also the active repository
-default. Gate 3 is open for the SS-M3-001 RunPlan execution slice; no state
-atlas or requirement-verdict architecture is authorized.
+default. Gate 3 is passed, closed and frozen. Gate 4 is open for SS-M4-001's
+interactive State Atlas and the essential overflow and broken-image detectors.
+No requirement-verdict, screenshot or editing architecture is authorized.
 
 ## Current shell
 
@@ -517,5 +518,47 @@ specific evidence gates and recovery behavior.
 
 Cancellation is ownership-based. A newer execution, new planning request,
 explicit cancellation or unmount aborts the current lease. Late results and
-progress from an aborted lease are ignored. Execution results remain separate
-from requirements; no requirement verdict, screenshot or atlas exists yet.
+progress from an aborted lease are ignored. At the frozen Gate 3 boundary,
+execution results remained separate from requirements and no requirement
+verdict, screenshot or atlas existed.
+
+## Gate 4 visual detector and State Atlas slice
+
+SS-M4-001 extends the frozen Gate 3 execution result without changing its
+status vocabulary. The active fixture's virtual runtime bridge waits 750 ms
+after a meaningful correlated render commit, then runs two bounded in-iframe
+detectors. Possible overflow observations contain only tag, optional `id` or
+`data-testid` hint, axis and finite client/scroll dimensions. Confirmed broken
+images require `complete === true` and `naturalWidth === 0`, and expose only alt
+presence plus an empty/relative/external/data source classification.
+
+Detector events reuse the accepted source marker, protocol version,
+session/run/fixture/nonce correlation and exact iframe-window equality. Their
+top-level and nested fields are strict and bounded. Unknown fields, excessive
+arrays, non-finite dimensions and mismatched fixture evidence fail closed. The
+parent assigns stable deterministic finding IDs and validates every final
+finding through `DetectorFindingSchema`. A detector collection failure leaves
+the execution result intact, emits no false finding and may add only a bounded
+detector-unavailable warning.
+
+The pure `buildStateAtlas` layer revalidates a completed execution session and
+the accepted RunPlan, requires exactly one known result for every fixture,
+preserves RunPlan order and validates its final model through
+`StateAtlasSchema`. Runtime, blank, compile, timeout, infrastructure and
+cancelled classifications take priority over visual warnings. A passed fixture
+with a finding is not clean.
+
+The completed `/preflight` presentation now uses summary metrics, accessible
+filters and meaningful state cards as the primary result view. The prior
+ordered execution detail remains available in a disclosure. Initial selection
+is the first issue, otherwise deterministic happy path, and filter changes
+resolve hidden selections to the first visible state.
+
+Only one selected passed state may mount the separate client-only inspection
+Sandpack. It uses the original submitted source, recorded JSON props and the
+same isolated virtual-file boundary. Failed and blank entries show a recorded-
+evidence overlay. Selection changes remove the prior keyed provider; starting a
+new execution removes the atlas before the execution sandbox becomes active.
+The inspection rerender never modifies the recorded result or detector
+findings. No submitted DOM is inserted into the parent, and no screenshot,
+requirement verdict, fixture editing or responsive viewport matrix was added.

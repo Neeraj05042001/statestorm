@@ -6,10 +6,13 @@ vi.mock("server-only", () => ({}));
 import { planSubmission } from "../../../server/preflight-planning";
 import type { AiPlannerProvider } from "../../../server/preflight-planning/provider";
 import {
+  atlasExampleCode,
+  atlasExamplePrompt,
   PreflightResultPanel,
   PreflightSubmissionClient,
 } from "../PreflightSubmissionClient";
 import { RunPlanExecutionView } from "../RunPlanExecutionPanel";
+import { buildStateAtlas } from "../../state-atlas/build-state-atlas";
 
 const supportedSubmission = {
   id: "preflight-ui-test",
@@ -57,6 +60,38 @@ function fakeProvider(): AiPlannerProvider {
 }
 
 describe("/preflight diagnostic UI", () => {
+  it("builds the reliable AtlasProductCard deterministic demo plan", async () => {
+    const response = await planSubmission(
+      {
+        id: "atlas-demo-test",
+        prompt: atlasExamplePrompt,
+        componentCode: atlasExampleCode,
+        language: "tsx",
+      },
+      { provider: null },
+    );
+
+    expect(response.accepted).toBe(true);
+    if (!response.accepted) return;
+    expect(response.contract.componentName).toBe("AtlasProductCard");
+    expect(response.runPlan.fixtures[0]?.id).toBe("det-happy-path");
+    expect(
+      response.runPlan.fixtures.find((fixture) => fixture.id === "det-empty-strings")
+        ?.props,
+    ).toMatchObject({ title: "", imageUrl: "" });
+    expect(
+      response.runPlan.fixtures.find((fixture) => fixture.id === "det-zero-numbers")
+        ?.props.price,
+    ).toBe(0);
+    expect(
+      String(
+        response.runPlan.fixtures.find(
+          (fixture) => fixture.id === "det-long-strings",
+        )?.props.title,
+      ).length,
+    ).toBeGreaterThan(100);
+  });
+
   it("renders the prompt, source, language, example and submit controls", () => {
     const html = renderToStaticMarkup(<PreflightSubmissionClient />);
 
@@ -206,41 +241,47 @@ describe("/preflight diagnostic UI", () => {
     });
     if (!response.accepted) throw new Error("Expected an accepted test plan");
     const [firstFixture, secondFixture] = response.runPlan.fixtures;
+    const runPlan = {
+      ...response.runPlan,
+      fixtures: [firstFixture, secondFixture],
+    };
+    const session = {
+      sessionId: "session-complete",
+      status: "completed" as const,
+      results: [
+        {
+          fixtureId: firstFixture.id,
+          status: "passed" as const,
+          summary: "Visible output rendered.",
+          evidence: {
+            sandboxCompleted: true,
+            renderCommitted: true,
+            expectedDomFound: true,
+            meaningfulDomFound: true,
+          },
+        },
+        {
+          fixtureId: secondFixture.id,
+          status: "runtime-error" as const,
+          summary: "The component threw while rendering.",
+          sanitizedMessage: "title was empty",
+          evidence: {
+            sandboxCompleted: true,
+            renderCommitted: false,
+            expectedDomFound: false,
+            meaningfulDomFound: false,
+          },
+        },
+      ],
+    };
     const html = renderToStaticMarkup(
       <RunPlanExecutionView
-        runPlan={response.runPlan}
+        runPlan={runPlan}
         state={{
           status: "completed",
           totalCount: 2,
-          session: {
-            sessionId: "session-complete",
-            status: "completed",
-            results: [
-              {
-                fixtureId: firstFixture.id,
-                status: "passed",
-                summary: "Visible output rendered.",
-                evidence: {
-                  sandboxCompleted: true,
-                  renderCommitted: true,
-                  expectedDomFound: true,
-                  meaningfulDomFound: true,
-                },
-              },
-              {
-                fixtureId: secondFixture.id,
-                status: "runtime-error",
-                summary: "The component threw while rendering.",
-                sanitizedMessage: "title was empty",
-                evidence: {
-                  sandboxCompleted: true,
-                  renderCommitted: false,
-                  expectedDomFound: false,
-                  meaningfulDomFound: false,
-                },
-              },
-            ],
-          },
+          session,
+          atlas: buildStateAtlas({ runPlan, executionSession: session }),
         }}
         adapterReady
         onStart={() => undefined}

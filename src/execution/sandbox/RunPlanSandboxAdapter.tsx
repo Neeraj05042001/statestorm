@@ -17,8 +17,10 @@ import {
 
 import {
   FixtureExecutionResultSchema,
+  type DetectorFinding,
   type FixtureExecutionResult,
 } from "../../domain";
+import { normalizeDetectorEvidence } from "../detectors";
 import type { FixtureSandboxExecutor } from "../execute-run-plan";
 import { sanitizeExecutionMessage } from "../sanitize-execution-message";
 import { createRunPlanSandboxFiles } from "./create-runplan-sandbox-files";
@@ -33,6 +35,7 @@ import {
 } from "./runtime-protocol";
 
 const FIXTURE_TIMEOUT_MS = 10_000;
+const DETECTOR_WAIT_TIMEOUT_MS = 1_750;
 
 type ExecuteFixtureInput = Parameters<FixtureSandboxExecutor["executeFixture"]>[0];
 
@@ -97,6 +100,11 @@ function ActiveFixtureSandbox({
     Extract<RunPlanSandboxEvent, { type: "RUNTIME_ERROR" }> | null
   >(null);
   const compileMessageRef = useRef<string | null>(null);
+  const detectorCompletedRef = useRef(false);
+  const detectorWaitStartedRef = useRef(false);
+  const detectorWaitTimeoutRef = useRef<number | null>(null);
+  const visualFindingsRef = useRef<DetectorFinding[]>([]);
+  const detectorWarningsRef = useRef<string[]>([]);
   const correlation = useMemo(
     () => ({
       sessionId: execution.input.sessionId,
@@ -111,6 +119,10 @@ function ActiveFixtureSandbox({
     (result: FixtureExecutionResult) => {
       if (completedRef.current) return;
       completedRef.current = true;
+      if (detectorWaitTimeoutRef.current !== null) {
+        window.clearTimeout(detectorWaitTimeoutRef.current);
+        detectorWaitTimeoutRef.current = null;
+      }
       onResult(
         execution.input.runId,
         FixtureExecutionResultSchema.parse(result),
@@ -118,6 +130,24 @@ function ActiveFixtureSandbox({
     },
     [execution.input.runId, onResult],
   );
+
+  const completePassed = useCallback(() => {
+    const evidence = renderEventRef.current?.evidence;
+    const warnings = detectorWarningsRef.current;
+    complete({
+      fixtureId: execution.input.fixture.id,
+      status: "passed",
+      summary: "The fixture compiled and produced meaningful visible DOM.",
+      evidence: {
+        sandboxCompleted: true,
+        renderCommitted: true,
+        expectedDomFound: evidence?.expectedDomFound ?? false,
+        meaningfulDomFound: evidence?.meaningfulDomFound ?? false,
+      },
+      visualFindings: visualFindingsRef.current,
+      ...(warnings.length > 0 ? { detectorWarnings: warnings } : {}),
+    });
+  }, [complete, execution.input.fixture.id]);
 
   const completeFromSignals = useCallback(() => {
     const runtimeError = runtimeErrorRef.current;
@@ -143,18 +173,18 @@ function ActiveFixtureSandbox({
       runtimeError,
     };
     if (hasPassedRuntimeSignals(signals)) {
-      const evidence = renderEventRef.current?.evidence;
-      complete({
-        fixtureId: execution.input.fixture.id,
-        status: "passed",
-        summary: "The fixture compiled and produced meaningful visible DOM.",
-        evidence: {
-          sandboxCompleted: true,
-          renderCommitted: true,
-          expectedDomFound: evidence?.expectedDomFound ?? false,
-          meaningfulDomFound: evidence?.meaningfulDomFound ?? false,
-        },
-      });
+      if (detectorCompletedRef.current) {
+        completePassed();
+      } else if (!detectorWaitStartedRef.current) {
+        detectorWaitStartedRef.current = true;
+        detectorWaitTimeoutRef.current = window.setTimeout(() => {
+          detectorCompletedRef.current = true;
+          detectorWarningsRef.current = [
+            "Visual detector evidence was unavailable within the bounded collection window.",
+          ];
+          completePassed();
+        }, DETECTOR_WAIT_TIMEOUT_MS);
+      }
       return;
     }
 
@@ -172,7 +202,7 @@ function ActiveFixtureSandbox({
         },
       });
     }
-  }, [complete, execution.input.fixture.id]);
+  }, [complete, completePassed, execution.input.fixture.id]);
 
   useEffect(() => {
     const handleMessage = (messageEvent: MessageEvent<unknown>) => {
@@ -187,7 +217,21 @@ function ActiveFixtureSandbox({
       const iframeWindow = previewRef.current?.getClient()?.iframe.contentWindow;
       if (!isExpectedMessageSource(messageEvent.source, iframeWindow)) return;
 
-      if (validation.event.type === "RUNTIME_ERROR") {
+      if (validation.event.type === "DETECTOR_EVIDENCE") {
+        try {
+          visualFindingsRef.current = normalizeDetectorEvidence({
+            fixtureId: execution.input.fixture.id,
+            observations: validation.event.observations,
+          });
+          detectorWarningsRef.current = validation.event.warnings;
+        } catch {
+          visualFindingsRef.current = [];
+          detectorWarningsRef.current = [
+            "Visual detector evidence failed validation and was not accepted.",
+          ];
+        }
+        detectorCompletedRef.current = true;
+      } else if (validation.event.type === "RUNTIME_ERROR") {
         runtimeErrorRef.current = validation.event;
       } else {
         renderEventRef.current = validation.event;
@@ -197,7 +241,16 @@ function ActiveFixtureSandbox({
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [completeFromSignals, correlation]);
+  }, [completeFromSignals, correlation, execution.input.fixture.id]);
+
+  useEffect(
+    () => () => {
+      if (detectorWaitTimeoutRef.current !== null) {
+        window.clearTimeout(detectorWaitTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let observedClient = previewRef.current?.getClient() ?? null;
@@ -279,6 +332,19 @@ function ActiveFixtureSandbox({
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
+      const signals = {
+        sandboxCompleted: sandpackCompletedRef.current,
+        renderEvent: renderEventRef.current,
+        runtimeError: runtimeErrorRef.current,
+      };
+      if (hasPassedRuntimeSignals(signals)) {
+        detectorCompletedRef.current = true;
+        detectorWarningsRef.current = [
+          "Visual detector evidence was unavailable before fixture cleanup.",
+        ];
+        completePassed();
+        return;
+      }
       complete({
         fixtureId: execution.input.fixture.id,
         status: "timeout",
@@ -294,7 +360,7 @@ function ActiveFixtureSandbox({
       });
     }, FIXTURE_TIMEOUT_MS);
     return () => window.clearTimeout(timeoutId);
-  }, [complete, execution.input.fixture.id]);
+  }, [complete, completePassed, execution.input.fixture.id]);
 
   return (
     <SandpackLayout style={{ height: 360 }}>

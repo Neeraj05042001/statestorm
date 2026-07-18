@@ -148,6 +148,115 @@ were not falsely marked passed or failed.
 The architecture authority accepted the production evidence. Gate 3 is passed,
 closed and frozen.
 
+## Gate 4 State Atlas verification path
+
+This sequence is the required SS-M4-001 manual path. Local production-build
+browser verification passed. Public Vercel Atlas verification remains pending,
+so Gate 4 stays open.
+
+Use this prompt:
+
+```text
+Render a product card with a title, price, image, featured treatment and calm
+or urgent tone. Exercise empty, zero-price, long-title and invalid-image states.
+```
+
+Use this TSX component (it is also the current `/preflight` example):
+
+```tsx
+interface AtlasProductCardProps {
+  title: string;
+  price: number;
+  imageUrl: string;
+  featured: boolean;
+  tone?: "calm" | "urgent";
+}
+
+export default function AtlasProductCard({
+  title = "Everyday mug",
+  price = 24.99,
+  imageUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='100'%3E%3Crect width='160' height='100' fill='%230ea5e9'/%3E%3C/svg%3E",
+  featured = true,
+  tone = "calm",
+}: AtlasProductCardProps) {
+  if (!title) throw new Error("Atlas product title must not be empty");
+  if (price === 0) return null;
+
+  return (
+    <article
+      data-tone={tone}
+      style={{ width: 240, padding: 16, border: "1px solid #cbd5e1" }}
+    >
+      <img
+        src={imageUrl}
+        alt={title + " product"}
+        style={{ display: "block", width: 160, height: 100 }}
+      />
+      <h2
+        data-testid="product-title"
+        style={{ maxWidth: 180, whiteSpace: "nowrap", overflow: "hidden" }}
+      >
+        {title}
+      </h2>
+      <p>{price.toFixed(2)}</p>
+      {featured ? <strong>Featured product</strong> : null}
+    </article>
+  );
+}
+```
+
+The deterministic happy path uses the embedded data image and should remain a
+clean successful state. The empty-string fixture should produce a contained
+runtime error. The zero-number fixture should produce a blank render. The long-
+string fixture should constrain a non-wrapping title so scroll width exceeds
+client width, and its unusable relative image value should be capable of a
+confirmed broken-image finding without public network availability.
+
+Run this sequence:
+
+1. Generate the RunPlan and execute all states.
+2. Confirm the State Atlas appears only after the completed session.
+3. Confirm at least one clean state, one runtime failure, one blank render, one
+   overflow warning and one broken-image state.
+4. Confirm All, Issues, Clean, Runtime, Blank, Overflow and Broken images show
+   the correct cards and visible selected state.
+5. Confirm the first issue in RunPlan order is selected by default.
+6. Select a clean state and confirm exactly one preview labeled **Live
+   inspection — rerendered from recorded fixture props**.
+7. Select the runtime and blank states and confirm their recorded-evidence
+   overlays appear without replacing the recorded result.
+8. Switch repeatedly between passed states and inspect the page for exactly one
+   inspection iframe lifecycle at a time.
+9. Run the complete plan again. Confirm the prior atlas unmounts, results reset,
+   the new serial session completes and no stale findings return.
+10. Replace the plan during execution and confirm the old preview, results and
+    detector messages cannot update the replacement UI.
+
+Repeat against development and `npm run start -- -p 3100`. Then re-run the
+frozen `/analyze` and `/gate-0` paths, deterministic fallback planning and live
+Gemini planning when local provider capacity is available. Record exact browser
+version, URL, session and fixture IDs, state totals, selected state, iframe
+count, parent exceptions and relevant hosted Sandpack network failures.
+
+### Recorded local production result
+
+The production-build browser sequence passed. Completed execution produced the
+validated atlas; runtime and blank results stayed correctly classified;
+overflow and confirmed broken-image evidence appeared; every filter worked;
+and the first issue was selected predictably. One clean selection mounted one
+inspection Sandpack, switching state replaced that lifecycle, runtime and blank
+selections showed overlays, and inspection did not replace recorded results.
+**Run again** reset and recreated the atlas.
+
+The first happy-path run produced one isolated timeout. It did not reproduce on
+rerun or after a hard refresh: happy path passed and Other failures returned to
+zero. A hydration warning was separately traced to a browser extension adding
+`cz-shortcut-listen` to `body`; incognito mode with extensions disabled removed
+the warning. No hydration suppression or layout change is warranted.
+
+No screenshots or prompt-requirement verdicts were added. Repeat the sequence
+on the public Vercel deployment before requesting Gate 4 closure.
+
 ### Regression and production build
 
 After the `/preflight` sequence, navigate directly to `/analyze` and `/gate-0`.

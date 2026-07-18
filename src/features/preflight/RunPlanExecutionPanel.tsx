@@ -12,6 +12,7 @@ import {
   type Fixture,
   type FixtureExecutionResult,
   type RunPlan,
+  type StateAtlas as StateAtlasModel,
 } from "../../domain";
 import {
   executeRunPlan,
@@ -21,6 +22,8 @@ import {
 import { createLatestExecutionGuard } from "../../execution/latest-execution-guard";
 import { sanitizeExecutionMessage } from "../../execution/sanitize-execution-message";
 import { RunPlanSandboxAdapterClient } from "../../execution/sandbox/RunPlanSandboxAdapterClient";
+import { StateAtlas } from "../state-atlas/StateAtlas";
+import { buildStateAtlas } from "../state-atlas/build-state-atlas";
 
 export type ExecutionPanelState =
   | { status: "plan-ready" }
@@ -42,6 +45,7 @@ export type ExecutionPanelState =
   | {
       status: "completed";
       session: ExecutionSessionResult;
+      atlas: StateAtlasModel;
       totalCount: number;
     }
   | {
@@ -69,9 +73,13 @@ function panelLabel(state: ExecutionPanelState): string {
   if (state.status === "infrastructure-failure") {
     return "Infrastructure failure";
   }
-  return state.session.results.every((result) => result.status === "passed")
-    ? "Completed with all passing"
-    : "Completed with failures";
+  if (!state.session.results.every((result) => result.status === "passed")) {
+    return "Completed with failures";
+  }
+  return state.atlas.summary.overflowWarnings > 0 ||
+    state.atlas.summary.brokenImages > 0
+    ? "Completed with visual issues"
+    : "Completed with all passing";
 }
 
 function stateResults(state: ExecutionPanelState) {
@@ -176,12 +184,22 @@ export function RunPlanExecutionView({
         </p>
       ) : null}
 
-      <div className="mt-5">
+      <div className={state.status === "completed" ? "hidden" : "mt-5"}>
         <h4 className="text-sm font-semibold">Active fixture preview</h4>
         <div className="mt-2">{preview}</div>
       </div>
 
-      {results.length > 0 ? (
+      {state.status === "completed" ? (
+        <div className="mt-6">
+          <StateAtlas
+            key={state.session.sessionId}
+            atlas={state.atlas}
+            runPlan={runPlan}
+          />
+        </div>
+      ) : null}
+
+      {results.length > 0 && state.status !== "completed" ? (
         <ol className="mt-5 space-y-2">
           {results.map((result) => (
             <li
@@ -207,6 +225,44 @@ export function RunPlanExecutionView({
             </li>
           ))}
         </ol>
+      ) : null}
+
+      {state.status === "completed" ? (
+        <details className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-sky-600">
+            Detailed execution evidence
+          </summary>
+          <ol className="mt-4 space-y-2">
+            {results.map((result) => (
+              <li
+                key={result.fixtureId}
+                className="rounded-lg border border-slate-200 bg-white p-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <code className="text-xs text-slate-700">
+                    {result.fixtureId}
+                  </code>
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-semibold ${statusBadgeClass(result.status)}`}
+                  >
+                    {result.status}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-slate-700">{result.summary}</p>
+                {result.sanitizedMessage ? (
+                  <p className="mt-1 text-sm text-rose-800">
+                    {result.sanitizedMessage}
+                  </p>
+                ) : null}
+                {result.detectorWarnings?.map((warning) => (
+                  <p key={warning} className="mt-1 text-sm text-amber-800">
+                    {warning}
+                  </p>
+                ))}
+              </li>
+            ))}
+          </ol>
+        </details>
       ) : null}
 
       <p className="mt-5 rounded-lg bg-sky-50 p-3 text-sm font-medium text-sky-950">
@@ -301,20 +357,21 @@ export function RunPlanExecutionPanel({
     })
       .then((session) => {
         if (!lease.isCurrent()) return;
-        setState(
-          session.status === "completed"
-            ? {
-                status: "completed",
-                session,
-                totalCount: runPlan.fixtures.length,
-              }
-            : {
-                status: "cancelled",
-                completedCount: session.results.length,
-                totalCount: runPlan.fixtures.length,
-                results: session.results,
-              },
-        );
+        if (session.status === "completed") {
+          setState({
+            status: "completed",
+            session,
+            atlas: buildStateAtlas({ runPlan, executionSession: session }),
+            totalCount: runPlan.fixtures.length,
+          });
+        } else {
+          setState({
+            status: "cancelled",
+            completedCount: session.results.length,
+            totalCount: runPlan.fixtures.length,
+            results: session.results,
+          });
+        }
         onExecutionActiveChange?.(false);
       })
       .catch((error: unknown) => {

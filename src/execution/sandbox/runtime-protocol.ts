@@ -1,3 +1,8 @@
+import {
+  DetectorObservationCollectionSchema,
+  type DetectorObservation,
+} from "../../domain";
+
 export const SANDBOX_EVENT_SOURCE = "statestorm-sandbox" as const;
 export const SANDBOX_PROTOCOL_VERSION = 1 as const;
 
@@ -37,6 +42,11 @@ export type RunPlanSandboxEvent =
         name: string;
         message: string;
       };
+    })
+  | (RuntimeEventBase & {
+      type: "DETECTOR_EVIDENCE";
+      observations: DetectorObservation[];
+      warnings: string[];
     });
 
 export type RunPlanProtocolValidationResult =
@@ -118,6 +128,18 @@ function isRuntimeError(value: unknown): value is { name: string; message: strin
   );
 }
 
+function hasExactKeys(
+  value: Record<string, unknown>,
+  expectedKeys: readonly string[],
+): boolean {
+  const actualKeys = Object.keys(value).sort();
+  const sortedExpectedKeys = [...expectedKeys].sort();
+  return (
+    actualKeys.length === sortedExpectedKeys.length &&
+    actualKeys.every((key, index) => key === sortedExpectedKeys[index])
+  );
+}
+
 export function validateRunPlanSandboxEvent(
   value: unknown,
   expected: RuntimeFixtureCorrelation,
@@ -157,6 +179,51 @@ export function validateRunPlanSandboxEvent(
     return {
       ok: true,
       event: { ...base, type: "RUNTIME_ERROR", error: value.error },
+    };
+  }
+
+  if (value.type === "DETECTOR_EVIDENCE") {
+    if (
+      !hasExactKeys(value, [
+        "source",
+        "protocolVersion",
+        "sessionId",
+        "runId",
+        "fixtureId",
+        "nonce",
+        "type",
+        "observations",
+        "warnings",
+      ])
+    ) {
+      return { ok: false, reason: "Detector event contains unexpected fields." };
+    }
+    const observations = DetectorObservationCollectionSchema.safeParse(
+      value.observations,
+    );
+    if (!observations.success) {
+      return { ok: false, reason: "Detector observations are malformed." };
+    }
+    if (
+      !Array.isArray(value.warnings) ||
+      value.warnings.length > 2 ||
+      !value.warnings.every(
+        (warning) =>
+          typeof warning === "string" &&
+          warning.trim().length > 0 &&
+          warning.length <= 300,
+      )
+    ) {
+      return { ok: false, reason: "Detector warnings are malformed." };
+    }
+    return {
+      ok: true,
+      event: {
+        ...base,
+        type: "DETECTOR_EVIDENCE",
+        observations: observations.data,
+        warnings: [...value.warnings],
+      },
     };
   }
 

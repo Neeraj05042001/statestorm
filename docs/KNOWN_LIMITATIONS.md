@@ -157,9 +157,9 @@
 47. **No rich collection synthesis.** Semantic assignments must still match the
     flat `ComponentContract` kind. Nested collection shapes are not inferred or
     type-checked beyond JSON and top-level array/object compatibility.
-48. **Preflight execution is not persisted.** `/preflight` keeps input, plan and
-    execution results in current browser memory. Reloading loses them, and no
-    state atlas or saved history is created.
+48. **Preflight and atlas data are not persisted.** `/preflight` keeps input,
+    plan, execution results and the derived State Atlas in current browser
+    memory. Reloading loses them, and no saved history is created.
 49. **Schema validity is not semantic quality.** A proposal can be concise and
     type-valid while still being weak, incomplete or unhelpful. Requirement
     classification is AI-proposed, and unsupported requirements are displayed
@@ -173,8 +173,9 @@
     StateStorm session, run, fixture and nonce fields.
 53. **No screenshots.** Execution keeps only bounded structured evidence and
     the live active preview; it does not capture or retain iframe images.
-54. **No overflow or broken-image detection.** Meaningful DOM is a minimal
-    visible-output signal, not a production layout or resource detector.
+54. **Visual detection is deliberately heuristic and narrow.** SS-M4-001 adds
+    bounded overflow and broken-image evidence, not a production layout,
+    accessibility, interaction or resource-verification system.
 55. **No requirement verification.** Execution results never claim a planned
     requirement passed or failed.
 56. **No responsive viewport matrix.** Every fixture uses the current preview
@@ -192,3 +193,32 @@
     cancellation and stale-result rejection. Gate 3 is passed, closed and
     frozen, but that evidence does not guarantee future hosted Sandpack
     availability or remove the security and product limitations above.
+61. **Overflow can produce false positives.** Intentional clipping, scrolling,
+    carousels, off-canvas content and decorative overflow can satisfy the
+    conservative scroll/client heuristic.
+62. **Overflow can produce false negatives.** Transform-only overflow,
+    pseudo-elements, canvas/SVG internals, late font changes, candidates beyond
+    the 200-element scan and layouts at untested viewport sizes can be missed.
+63. **Image collection is point-in-time.** Images still unresolved after the
+    750 ms settle window are not called broken. External availability, cache and
+    timing can change the later result.
+64. **Live inspection is a rerender, not a screenshot.** The selected preview
+    reuses recorded props in a new Sandpack lifecycle. It may differ from the
+    recorded execution, whose status and findings remain authoritative.
+65. **Only one state is live-inspectable.** Atlas cards are recorded data and do
+    not mount parallel sandboxes. Failed and blank states show overlays rather
+    than attempting to replace their recorded outcomes.
+66. **No visual regression baseline.** There is no pixel comparison, screenshot
+    retention or reference-image history.
+67. **No requirement verification.** Atlas categories describe execution and
+    the two visual detectors only; they do not prove a prompt statement passed
+    or failed.
+68. **No atlas persistence or report export.** There is no database, session
+    history, collaboration, downloadable report or shareable artifact.
+69. **Gate 4 public verification is pending.** Automated validation and local
+    production-build `AtlasProductCard` browser verification passed. The same
+    atlas, detector, inspection and rerun sequence has not yet been recorded on
+    the public Vercel deployment, so Gate 4 remains open.
+70. **One initial happy-path timeout was non-reproducible.** It cleared on rerun
+    and after a hard refresh, with happy path passed and Other failures at zero.
+    It remains point-in-time local evidence, not a confirmed StateStorm defect.

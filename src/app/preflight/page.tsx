@@ -9,7 +9,7 @@ export default function PreflightPage() {
         Back to StateStorm
       </Link>
       <p className="mt-8 text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
-        Gate 3 execution diagnostic
+        Gate 4 State Atlas diagnostic
       </p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
         Component preflight planning

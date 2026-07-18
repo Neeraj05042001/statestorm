@@ -287,6 +287,45 @@ describe("executeRunPlan", () => {
     expect(ExecutionSessionResultSchema.safeParse(session).success).toBe(true);
   });
 
+  it("does not attach another fixture's visual finding", async () => {
+    const executor: FixtureSandboxExecutor = {
+      async executeFixture({ fixture }) {
+        return {
+          ...result(fixture.id),
+          visualFindings: [
+            {
+              id: "detector-stale-overflow-1",
+              fixtureId: "stale-fixture",
+              kind: "layout-overflow",
+              severity: "warning",
+              summary: "Possible horizontal layout overflow was detected.",
+              evidence: {
+                detector: "overflow-v1",
+                elementTag: "H2",
+                axis: "horizontal",
+                clientWidth: 180,
+                scrollWidth: 420,
+              },
+            },
+          ],
+        } as FixtureExecutionResult;
+      },
+    };
+    const session = await executeRunPlan({
+      runPlan: makePlan(["current-fixture"]),
+      componentSource,
+      signal: new AbortController().signal,
+      executor,
+      createId: idFactory(),
+    });
+
+    expect(session.results[0]).toMatchObject({
+      fixtureId: "current-fixture",
+      status: "infrastructure-error",
+    });
+    expect(session.results[0]?.visualFindings).toBeUndefined();
+  });
+
   it("requires the retained source from the validated plan", async () => {
     await expect(
       executeRunPlan({

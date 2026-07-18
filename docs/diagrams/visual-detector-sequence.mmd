@@ -1,0 +1,18 @@
+sequenceDiagram
+  participant O as Serial orchestrator
+  participant P as Parent adapter
+  participant S as Sandpack iframe
+  participant A as State Atlas builder
+
+  O->>P: Execute one correlated fixture
+  P->>S: Source + JSON props + session/run/fixture/nonce
+  S-->>P: RENDER_COMMITTED
+  Note over S: Wait 750 ms after meaningful commit
+  S->>S: Inspect bounded layout and img candidates
+  S-->>P: DETECTOR_EVIDENCE with bounded metadata
+  P->>P: Validate source window, correlation and schema
+  P->>P: Assign deterministic finding IDs
+  P-->>O: Existing execution status + visual findings
+  O->>O: Unmount fixture sandbox before next fixture
+  O-->>A: Completed validated execution session
+  A->>A: Preserve RunPlan order and derive categories

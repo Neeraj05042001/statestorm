@@ -65,4 +65,20 @@ describe("RunPlan Sandpack virtual files", () => {
     expect(first).toContain("run-one");
     expect(second).toContain("run-two");
   });
+
+  it("runs bounded overflow and broken-image detectors inside the sandbox", () => {
+    const files = createRunPlanSandboxFiles(input);
+    const runtimeFile = files["/src/runtime-bridge.tsx"];
+    const runtimeSource =
+      typeof runtimeFile === "string" ? runtimeFile : runtimeFile?.code ?? "";
+
+    expect(runtimeSource).toContain('type: "DETECTOR_EVIDENCE"');
+    expect(runtimeSource).toContain("DETECTOR_SETTLE_MS = 750");
+    expect(runtimeSource).toContain("scrollWidth > htmlElement.clientWidth");
+    expect(runtimeSource).toContain("image.complete");
+    expect(runtimeSource).toContain("image.naturalWidth !== 0");
+    expect(runtimeSource).toContain("MAX_FINDINGS_PER_DETECTOR = 5");
+    expect(runtimeSource).not.toContain("innerHTML");
+    expect(runtimeSource).not.toContain("image.src");
+  });
 });
