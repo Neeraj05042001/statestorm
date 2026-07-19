@@ -2,9 +2,9 @@
 
 ## Current work
 
-- Gate: Final submission packaging after Gate 0 through Gate 4 and SS-M5-001 passed, closed and frozen
-- Task: SS-M5-002-F1 (final judge-facing editorial refinement and validation complete; submission-authority decision pending)
-- State: The submission package now has a product-first public README, a 299-word production demo script, a visual six-slide story, a recommended short form description, refined public AI/Codex disclosure and a deadline-driven final checklist; no video, slide binary, staging, commit, push or deployment is authorized
+- Gate: Post-Gate 4 public homepage presentation; the accepted product workflow remains frozen
+- Task: SS-UI-HOME-001-F1 (final premium homepage footer implementation candidate)
+- State: The accepted static homepage now ends with a compact server-rendered footer containing only the approved brand, product/resource navigation, trust line, human attribution and authority principle; automated validation and optimized-production responsive QA are complete, and no animation, staging, commit, push or deployment is authorized
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
 - Latest accepted milestone: SS-M5-001 final product experience at accepted and deployed HEAD `c281d1659e86ba4bf253874f963f753bf7917017`
@@ -14,6 +14,72 @@
 - Gate 2 baseline: Frozen deterministic fixtures, Gemini proposal boundary, trusted materialization and stable RunPlan assembly
 - Gate 3 baseline: Frozen serialized fixture execution through the client-only Sandpack boundary, validated execution results and stale-session ownership rejection
 - Gate 4 baseline: Frozen validated State Atlas, essential overflow and broken-image detectors, judge-facing filters/cards and one selected-state inspection rerender only
+
+## SS-UI-HOME-001-F1 final homepage footer candidate
+
+The footer-only follow-up adds one static `LandingFooter` after the accepted
+homepage composition. It does not modify the hero, evidence, workflow,
+authority, technical-proof or final-CTA components. The compact semantic footer
+uses the existing StateStorm mark and landing tokens, real homepage anchors,
+the verified demo route and explicit public GitHub documentation destinations.
+All four external links are visibly marked, open in a new tab and use
+`rel="noreferrer"`.
+
+Desktop renders the brand, Product and Resources areas as three restrained
+columns. At 768 px the brand spans a two-column link layout, and at 390 px the
+footer stacks cleanly. The trust line and bottom attribution remain readable at
+each width. The footer introduces no Client Component, dependency, capability,
+animation, oversized CTA or persisted state.
+
+### SS-UI-HOME-001-F1 validation evidence
+
+| Command or audit | Result | Important output |
+| --- | --- | --- |
+| `npm run lint` | Pass | ESLint completed with zero errors and zero warnings |
+| `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
+| `npm run test` | Pass | Vitest 4.1.10 passed 285 tests across 27 files; seven focused footer tests were added |
+| `npm run build` | Pass | Next.js 16.2.10 compiled, type-checked, generated all nine pages and kept `/` statically prerendered |
+| `git diff --check` | Pass | No whitespace errors; only the repository's existing LF-to-CRLF checkout warnings were printed |
+| Scope audit | Pass | No `/preflight`, planning, execution, API, detector, domain, package declaration or lockfile change; no landing file contains a `use client` boundary |
+| Footer link audit | Pass | The demo route and all three homepage anchors resolve locally; all four external links use the approved public repository paths, visible external marks, `_blank` and `noreferrer` |
+| Production visual QA | Pass | Chrome footer captures at 1440 and 390 px; 1440, 768 and 390 audits reported exact viewport/scroll-width equality, all target anchors present and no browser or console errors |
+
+The next permitted action is ChatGPT Project review of SS-UI-HOME-001-F1.
+Animation, staging, commit, push and deploy remain unauthorized.
+
+## SS-UI-HOME-001 homepage foundation candidate
+
+The homepage-only candidate replaces the earlier generic MVP presentation with
+the **Stormglass Evidence Lab** direction. `src/app/page.tsx` remains a Server
+Component and composes static, homepage-specific presentation components. No
+Client Component, animation package, remote font, raster asset, live execution,
+fake screenshot, fake count or new product capability is introduced.
+
+The candidate includes the approved navigation, positioning and demo actions;
+an original inline-SVG Storm Core; a clearly labelled illustrative Product
+preview of the implemented State Atlas evidence taxonomy; the four accepted
+runtime, blank, overflow and broken-image evidence categories; the six accepted
+workflow stages; the AI/evidence authority boundary; the approved technical
+metrics and labels; and the verified AtlasProductCard final CTA and supported
+scope. Responsive CSS is isolated to the landing feature and supplies keyboard
+focus states, semantic landmarks, a skip link and narrow-screen stacking.
+
+### SS-UI-HOME-001 validation evidence
+
+| Command or audit | Result | Important output |
+| --- | --- | --- |
+| `npm run lint` | Pass | ESLint completed with zero errors and zero warnings |
+| `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
+| `npm run test` | Pass | Vitest 4.1.10 passed 278 tests across 27 files; seven focused homepage tests were added to the earlier 271-test baseline |
+| `npm run build` | Pass | Next.js 16.2.10 compiled, type-checked, generated all nine static pages and kept `/` statically prerendered |
+| `git diff --check` | Pass | No whitespace errors; only the repository's existing LF-to-CRLF checkout warnings were printed |
+| Homepage scope audit | Pass | No `/preflight`, planning, execution, API, detector, domain, package declaration or lockfile change; no landing file contains a `use client` boundary |
+| Link and claim audit | Pass | Every internal homepage link targets `/`, `/preflight?demo=1` or an existing anchor; the GitHub URL is the verified public repository; no fake execution, screenshot, customer, star, metric or unimplemented-capability claim was added |
+| Production visual QA | Pass | Chrome production-build captures at 1440 × 900 and 390 × 844 plus hero, workflow, authority and final-CTA sections; 1440, 1280, 768 and 390 audits reported exact viewport/scroll-width equality, clean navigation collapse and no browser errors |
+
+The next permitted action is ChatGPT Project static-design review of
+SS-UI-HOME-001. The accepted workflow remains unchanged. Motion, staging,
+commit, push and deploy remain unauthorized.
 
 ## SS-M5-002-F1 editorial refinement candidate
 
