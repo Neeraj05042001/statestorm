@@ -2,18 +2,78 @@
 
 ## Current work
 
-- Gate: Gate 5 product-experience candidate (Gate 0 through Gate 4 remain passed, closed and frozen)
-- Task: SS-M5-001 (implementation and local verification complete; architecture decision pending)
-- State: Judge-facing homepage, three-stage preflight, stable demo entry, consolidated state-plan presentation and primary State Atlas experience are implemented and validated locally at an unstaged working-tree candidate
+- Gate: Final submission packaging after Gate 0 through Gate 4 and SS-M5-001 passed, closed and frozen
+- Task: SS-M5-002-F1 (final judge-facing editorial refinement and validation complete; submission-authority decision pending)
+- State: The submission package now has a product-first public README, a 299-word production demo script, a visual six-slide story, a recommended short form description, refined public AI/Codex disclosure and a deadline-driven final checklist; no video, slide binary, staging, commit, push or deployment is authorized
 - Architecture authority: ChatGPT Project
 - Repository executor: Codex
-- Latest accepted milestone: Gate 4 Interactive State Atlas and essential visual detectors at accepted HEAD `594599457d451b44466575a54861cf16e5b6052d`
+- Latest accepted milestone: SS-M5-001 final product experience at accepted and deployed HEAD `c281d1659e86ba4bf253874f963f753bf7917017`
 - Gate 0 execution architecture: Frozen and reused through narrow protocol primitives
 - RunPlan version 1: Frozen and unchanged
 - Gate 1 baseline: Frozen RunPlan v1, deterministic source analysis and server-only submission workflow
 - Gate 2 baseline: Frozen deterministic fixtures, Gemini proposal boundary, trusted materialization and stable RunPlan assembly
 - Gate 3 baseline: Frozen serialized fixture execution through the client-only Sandpack boundary, validated execution results and stale-session ownership rejection
 - Gate 4 baseline: Frozen validated State Atlas, essential overflow and broken-image detectors, judge-facing filters/cards and one selected-state inspection rerender only
+
+## SS-M5-002-F1 editorial refinement candidate
+
+The authorized documentation-only refinement preserves all eight submission
+deliverables while tightening the judge-facing story. The demo now uses the
+required component-failure cold open, contains 299 narrated words, targets an
+edited 2:25–2:40 and reaches the completed State Atlas by 1:25. The deck remains
+exactly six slides and now centers the real Atlas, four demonstrated hidden
+failures, the requirement-to-evidence journey, the AI/evidence authority split,
+technical proof and the focused deployed scope.
+
+The README is now a product-first public landing page: positioning and concise
+explanation, direct Live Product and Stable Demo links, four concrete findings,
+a textual visual-workflow slot, supported scope, concise security qualification,
+setup, Gemini configuration, test evidence, acknowledgements and detailed docs.
+No pending artifact token, accepted-baseline commit, SS-M5 terminology or
+“architecture authority” wording appears in the rendered README.
+
+The 105-word description is marked as the recommended form default and begins
+with the required integration-focused sentence. Evidence-backed impact language
+replaces weak phrasing. Public Codex disclosure uses **human-led product
+direction and architecture review**. The final checklist records the July 19,
+2026, 11:59 PM IST deadline, a 45–60 minute early-submit target, backup video and
+deck copies, metadata/thumbnail/YouTube processing checks and private archives.
+No application source, test, package declaration, dependency, configuration or
+production environment is changed.
+
+Read-only public verification on 2026-07-19 confirmed HTTP 200 responses from
+the production homepage, loaded demo route and public GitHub repository. The
+homepage displayed the accepted positioning, workflow, capabilities and narrow
+scope. The stable demo route displayed **Demo example loaded**, the accepted
+prompt/source, the three-stage flow, and the planning/execution boundary copy.
+
+### SS-M5-002-F1 validation evidence
+
+| Command or audit | Result | Important output |
+| --- | --- | --- |
+| `npm run lint` | Pass | ESLint completed with zero errors and zero warnings |
+| `npm run typecheck` | Pass | `tsc --noEmit` completed with no errors |
+| `npm run test` | Pass | Vitest 4.1.10 passed 271 tests across 27 files |
+| `npm run build` | Pass | Next.js 16.2.10 compiled, type-checked and emitted static `/`, `/analyze`, `/gate-0`, dynamic `/preflight` and both server APIs |
+| `git diff --check` | Pass | No whitespace errors; only the repository's existing LF-to-CRLF checkout warnings were printed |
+| Untracked-document whitespace audit | Pass | All eight new Markdown files have final newlines and no trailing whitespace |
+| Relative Markdown link audit | Pass | Every relative link in README and `docs/submission/*.md` resolves locally |
+| Public project-link audit | Pass | Homepage, stable demo and public GitHub repository each returned HTTP 200 |
+| Rendered README audit | Pass | No pending video, deck or screenshot token; baseline commit; SS-M5 term; or “architecture authority” wording is visible |
+| Editorial measurement | Pass | Demo narration is 299 words; recommended form description is 105 words; deck contains exactly six slides |
+| Secret-like string audit | Pass | Only the documented fake setup value `your_server_only_key` and warning/checklist prose were found; no credential value was added |
+| Claim and scope audit | Pass | Current capabilities, documented limitations and future work remain distinct |
+
+The repository change set contains documentation, README and status files only.
+`package.json`, `package-lock.json` and application/test source are unchanged.
+No screenshot, recording, slide binary, secret, staging, commit, push or deploy
+was created or performed.
+
+The next permitted action is submission-authority review of SS-M5-002-F1. After
+acceptance, Neeraj may record and publish the video, create and publish the
+six-slide deck, replace the private submission placeholders and complete the manual
+final-submission gate. Repository staging, commit, push or deployment still
+requires separate authorization.
 
 ## SS-M5-001 implementation candidate
 
